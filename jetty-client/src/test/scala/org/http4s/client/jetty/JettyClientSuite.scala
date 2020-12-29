@@ -20,6 +20,6 @@ package jetty
 
 import cats.effect.IO
 
-class JettyClientSpec extends ClientRouteTestBattery("JettyClient") {
-  override def clientResource = JettyClient.resource[IO]()
+class JettyClientSuite extends ClientRouteTestBattery("JettyClient") {
+  def clientResource = JettyClient.resource[IO]()
 }
