@@ -19,11 +19,12 @@ package jetty
 package server
 
 import cats.effect.IO
+import cats.effect.Resource
 import cats.effect.Temporal
 import cats.syntax.all._
+import munit.CatsEffectSuite
 import org.http4s.dsl.io._
 import org.http4s.server.Server
-import org.http4s.testing.AutoCloseableResource
 
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -32,7 +33,7 @@ import java.nio.charset.StandardCharsets
 import scala.concurrent.duration._
 import scala.io.Source
 
-class JettyServerSuite extends Http4sSuite {
+class JettyServerSuite extends CatsEffectSuite {
 
   private def builder = JettyBuilder[IO]
 
@@ -65,12 +66,16 @@ class JettyServerSuite extends Http4sSuite {
   private val jettyServer = ResourceFixture[Server](serverR)
 
   private def get(server: Server, path: String): IO[String] =
-    IO.blocking(
-      AutoCloseableResource.resource(
-        Source
-          .fromURL(new URL(s"http://127.0.0.1:${server.address.getPort}$path"))
-      )(_.getLines().mkString)
-    )
+    Resource
+      .make(
+        IO.blocking(
+          Source
+            .fromURL(new URL(s"http://127.0.0.1:${server.address.getPort}$path"))
+        )
+      )(source => IO(source.close()))
+      .use { source =>
+        IO.blocking(source.getLines().mkString)
+      }
 
   private def post(server: Server, path: String, body: String): IO[String] =
     IO.blocking {
@@ -81,10 +86,15 @@ class JettyServerSuite extends Http4sSuite {
       conn.setRequestProperty("Content-Length", bytes.size.toString)
       conn.setDoOutput(true)
       conn.getOutputStream.write(bytes)
-
-      AutoCloseableResource.resource(
-        Source.fromInputStream(conn.getInputStream, StandardCharsets.UTF_8.name)
-      )(_.getLines().mkString)
+      conn
+    }.flatMap { conn =>
+      Resource
+        .make(
+          IO.blocking(Source.fromInputStream(conn.getInputStream, StandardCharsets.UTF_8.name))
+        )(source => IO(source.close()))
+        .use { source =>
+          IO.blocking(source.getLines().mkString)
+        }
     }
 
   jettyServer.test("ChannelOptions should route requests on the service executor") { server =>
