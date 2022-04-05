@@ -18,30 +18,58 @@ package com.example.http4s
 package jetty
 
 import cats.effect._
-import com.codahale.metrics.MetricRegistry
+import org.http4s._
 import org.http4s.jetty.server.JettyBuilder
-import org.http4s.metrics.dropwizard._
-import org.http4s.server.HttpMiddleware
 import org.http4s.server.Server
-import org.http4s.server.middleware.Metrics
+import org.http4s.servlet.DefaultFilter
 
+import javax.servlet.FilterChain
+import javax.servlet.http.HttpServlet
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+
+/** 1. Run as `sbt examples/run`
+  * 2. Browse to http://localhost:8080/http4s to see `httpRoutes`
+  * 3. Browse to http://localhost:8080/raw to see a raw servlet alongside the http4s routes
+  * 4. Browse to http://localhost:8080/raw/black-knight to see a route with a servlet filter
+  */
 object JettyExample extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
-    JettyExampleApp.resource[IO].use(_ => IO.never).as(ExitCode.Success)
+    new JettyExample[IO].resource.use(_ => IO.never).as(ExitCode.Success)
 }
 
-object JettyExampleApp {
-  def builder[F[_]: Async]: JettyBuilder[F] = {
-    val metricsRegistry: MetricRegistry = new MetricRegistry
-    val metrics: HttpMiddleware[F] = Metrics[F](Dropwizard(metricsRegistry, "server"))
-
-    JettyBuilder[F]
-      .bindHttp(8080)
-      .mountService(metrics(ExampleService[F].routes), "/http4s")
-      .mountService(metricsService(metricsRegistry), "/metrics")
-      .mountFilter(NoneShallPass, "/black-knight/*")
+class JettyExample[F[_]](implicit F: Async[F]) {
+  def httpRoutes = HttpRoutes.of[F] {
+    case req if req.method == Method.GET =>
+      Sync[F].pure(Response(Status.Ok).withEntity("/pong"))
   }
 
-  def resource[F[_]: Async]: Resource[F, Server] =
-    builder[F].resource
+  // Also supports raw servlets alongside your http4s routes
+  val rawServlet = new HttpServlet {
+    override def doGet(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): Unit =
+      response.getWriter.print("Raw servlet")
+  }
+
+  // Also supports raw filters alongside your http4s routes
+  val filter = new DefaultFilter {
+    override def doHttpFilter(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        chain: FilterChain,
+    ): Unit = {
+      response.setStatus(403)
+      response.getWriter.print("None shall pass!")
+    }
+  }
+
+  def resource: Resource[F, Server] =
+    JettyBuilder[F]
+      .bindHttp(8080)
+      .mountService(httpRoutes, "/http4s")
+      .mountServlet(rawServlet, "/raw/*")
+      .mountFilter(filter, "/raw/black-knight/*")
+      .resource
 }

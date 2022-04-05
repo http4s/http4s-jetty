@@ -23,6 +23,7 @@ val jettyVersion = "9.4.46.v20220331"
 val http4sVersion = "0.23.11"
 val http4sServletVersion = "0.23.11"
 val munitCatsEffectVersion = "1.0.7"
+val slf4jVersion = "1.7.25"
 
 lazy val jettyServer = project
   .in(file("jetty-server"))
@@ -40,5 +41,19 @@ lazy val jettyServer = project
       "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
     ),
   )
+
+lazy val examples = project
+  .in(file("examples"))
+  .enablePlugins(NoPublishPlugin)
+  .settings(
+    name := "http4s-jetty-examples",
+    description := "Example of http4s server on JEtty",
+    startYear := Some(2014),
+    fork := true,
+    libraryDependencies ++= Seq(
+      "org.slf4j" % "slf4j-simple" % slf4jVersion % Runtime
+    ),
+  )
+  .dependsOn(jettyServer)
 
 lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)
