@@ -61,7 +61,7 @@ lazy val examples = project
 lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)
 
 val jettyApiMappings: Setting[_] =
-  apiMappings ++= (Compile / fullClasspath).value
+  doc / apiMappings ++= (Compile / fullClasspath).value
     .flatMap { entry =>
       entry.get(moduleID.key).map(entry -> _)
     }
@@ -84,7 +84,7 @@ val javaApiMappings: Setting[_] = {
     case v if v < 11 => url(s"https://docs.oracle.com/javase/${javaVersion}/docs/api/")
     case _ => url(s"https://docs.oracle.com/en/java/javase/${javaVersion}/docs/api/java.base/")
   }
-  apiMappings ++= {
+  doc / apiMappings ++= {
     val runtimeMXBean = java.lang.management.ManagementFactory.getRuntimeMXBean
     val bootClassPath =
       if (runtimeMXBean.isBootClassPathSupported)
