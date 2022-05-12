@@ -39,6 +39,8 @@ lazy val jettyServer = project
       "org.http4s" %% "http4s-servlet" % http4sServletVersion,
       "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
     ),
+    jettyApiMappings,
+    javaApiMappings,
   )
 
 lazy val examples = project
@@ -56,3 +58,41 @@ lazy val examples = project
   .dependsOn(jettyServer)
 
 lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)
+
+val jettyApiMappings: Setting[_] =
+  doc / apiMappings ++= (Compile / fullClasspath).value
+    .flatMap { entry =>
+      entry.get(moduleID.key).map(entry -> _)
+    }
+    .collect {
+      case (entry, module)
+          if module.organization == "org.eclipse.jetty" || module.organization == "org.eclipse.jetty.http2" =>
+        val major = module.revision.split('.').head
+        entry.data -> url(s"https://www.eclipse.org/jetty/javadoc/jetty-${major}/")
+    }
+    .toMap
+
+// This works out of the box in Scala 2.13, but 2.12 needs some help.
+val javaApiMappings: Setting[_] = {
+  val javaVersion = sys.props("java.specification.version") match {
+    case VersionNumber(Seq(1, v, _*), _, _) => v
+    case VersionNumber(Seq(v, _*), _, _) => v
+    case _ => 8 // not worth crashing over
+  }
+  val baseUrl = javaVersion match {
+    case v if v < 11 => url(s"https://docs.oracle.com/javase/${javaVersion}/docs/api/")
+    case _ => url(s"https://docs.oracle.com/en/java/javase/${javaVersion}/docs/api/java.base/")
+  }
+  doc / apiMappings ++= {
+    val runtimeMXBean = java.lang.management.ManagementFactory.getRuntimeMXBean
+    val bootClassPath =
+      if (runtimeMXBean.isBootClassPathSupported)
+        runtimeMXBean.getBootClassPath
+          .split(java.io.File.pathSeparatorChar)
+          .map(file(_) -> baseUrl)
+          .toMap
+      else
+        Map.empty
+    bootClassPath ++ Map(file("/modules/java.base") -> baseUrl)
+  }
+}
