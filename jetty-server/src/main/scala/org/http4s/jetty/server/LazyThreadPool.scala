@@ -35,7 +35,7 @@ private[jetty] object LazyThreadPool {
   def newLazyThreadPool: ThreadPool =
     new ThreadPool {
 
-      private val value: Eval[ThreadPool] = Eval.later(new QueuedThreadPool())
+      private val value: Eval[ThreadPool] = Eval.later(new QueuedThreadPool)
 
       override final def getIdleThreads: Int = value.value.getIdleThreads
 

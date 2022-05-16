@@ -284,7 +284,7 @@ sealed class JettyBuilder[F[_]] private (
         .lifeCycleAsResource[F, JServer](
           F.delay {
             val jetty = new JServer(threadPool)
-            val context = new ServletContextHandler()
+            val context = new ServletContextHandler
 
             context.setContextPath("/")
 
@@ -373,7 +373,7 @@ object JettyBuilder {
       clientAuth: SSLClientAuthMode,
   ) extends SslConfig {
     def makeSslContextFactory: Option[SslContextFactory.Server] = {
-      val sslContextFactory = new SslContextFactory.Server()
+      val sslContextFactory = new SslContextFactory.Server
       sslContextFactory.setKeyStorePath(keyStore.path)
       sslContextFactory.setKeyStorePassword(keyStore.password)
       sslContextFactory.setKeyManagerPassword(keyManagerPassword)
@@ -392,7 +392,7 @@ object JettyBuilder {
   private class ContextWithClientAuth(sslContext: SSLContext, clientAuth: SSLClientAuthMode)
       extends SslConfig {
     def makeSslContextFactory: Option[SslContextFactory.Server] = {
-      val sslContextFactory = new SslContextFactory.Server()
+      val sslContextFactory = new SslContextFactory.Server
       sslContextFactory.setSslContext(sslContext)
       updateClientAuth(sslContextFactory, clientAuth)
       sslContextFactory.some
@@ -402,7 +402,7 @@ object JettyBuilder {
 
   private class ContextOnly(sslContext: SSLContext) extends SslConfig {
     def makeSslContextFactory: Option[SslContextFactory.Server] = {
-      val sslContextFactory = new SslContextFactory.Server()
+      val sslContextFactory = new SslContextFactory.Server
       sslContextFactory.setSslContext(sslContext)
       sslContextFactory.some
     }
@@ -412,7 +412,7 @@ object JettyBuilder {
   private class ContextWithParameters(sslContext: SSLContext, sslParameters: SSLParameters)
       extends SslConfig {
     def makeSslContextFactory: Option[SslContextFactory.Server] = {
-      val sslContextFactory = new SslContextFactory.Server()
+      val sslContextFactory = new SslContextFactory.Server
       sslContextFactory.setSslContext(sslContext)
       sslContextFactory.customize(sslParameters)
       sslContextFactory.some
@@ -443,7 +443,7 @@ object JettyBuilder {
 
   /** The default [[org.eclipse.jetty.server.HttpConfiguration]] to use with jetty. */
   private val defaultJettyHttpConfiguration: HttpConfiguration = {
-    val config: HttpConfiguration = new HttpConfiguration()
+    val config: HttpConfiguration = new HttpConfiguration
     config.setRequestHeaderSize(defaults.MaxHeadersSize)
     config
   }
