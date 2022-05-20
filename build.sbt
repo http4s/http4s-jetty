@@ -19,6 +19,7 @@ ThisBuild / resolvers +=
 lazy val jettyClient = project
   .in(file("jetty-client"))
   .settings(
+    name := "http4s-jetty-client",
     description := "jetty implementation for http4s clients",
     startYear := Some(2018),
     libraryDependencies ++= Seq(
