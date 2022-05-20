@@ -23,10 +23,10 @@ lazy val jettyClient = project
     description := "jetty implementation for http4s clients",
     startYear := Some(2018),
     libraryDependencies ++= Seq(
-      "org.http4s" %% "http4s-core" % http4sVersion,
+      "org.http4s" %% "http4s-client" % http4sVersion,
       "org.eclipse.jetty" % "jetty-client" % jettyVersion,
       "org.eclipse.jetty" % "jetty-http" % jettyVersion,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
-      "org.http4s" %% "http4s-client-testkit" % http4sVersion % Test,
+      "org.http4s" %% "http4s-client-testkit" % "0.23.11-473-e7e64cb-SNAPSHOT" % Test,
     ),
   )
