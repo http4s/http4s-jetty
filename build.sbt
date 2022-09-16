@@ -72,7 +72,7 @@ lazy val jettyClient = project
       "org.eclipse.jetty" % "jetty-client" % jettyVersion,
       "org.eclipse.jetty" % "jetty-http" % jettyVersion,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
-      "org.http4s" %% "http4s-client-testkit" % "0.23.13" % Test,
+      "org.http4s" %% "http4s-client-testkit" % "0.23.16" % Test,
     ),
   )
 
