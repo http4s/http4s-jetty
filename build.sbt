@@ -36,6 +36,7 @@ lazy val jettyServer = project
     description := "Jetty implementation for http4s servers",
     startYear := Some(2014),
     libraryDependencies ++= Seq(
+      "org.eclipse.jetty" % "jetty-client" % jettyVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
       "org.eclipse.jetty.http2" % "http2-server" % jettyVersion,

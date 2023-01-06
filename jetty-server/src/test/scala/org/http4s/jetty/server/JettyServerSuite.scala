@@ -21,21 +21,30 @@ package server
 import cats.effect.IO
 import cats.effect.Resource
 import cats.effect.Temporal
-import cats.syntax.all._
 import munit.CatsEffectSuite
+import org.eclipse.jetty.client.HttpClient
+import org.eclipse.jetty.client.api.Request
+import org.eclipse.jetty.client.api.Response
+import org.eclipse.jetty.client.api.Result
+import org.eclipse.jetty.client.util.BufferingResponseListener
+import org.eclipse.jetty.client.util.StringContentProvider
+
 import org.http4s.dsl.io._
 import org.http4s.server.Server
 
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
-import java.nio.charset.StandardCharsets
 import scala.concurrent.duration._
-import scala.io.Source
 
 class JettyServerSuite extends CatsEffectSuite {
 
   private def builder = JettyBuilder[IO]
+
+  private val client =
+    ResourceSuiteLocalFixture(
+      "jetty-client",
+      Resource.make(IO(new HttpClient()))(c => IO(c.stop())).evalTap(c => IO(c.start())),
+    )
+
+  override def munitFixtures = List(client)
 
   private val serverR =
     builder
@@ -65,37 +74,30 @@ class JettyServerSuite extends CatsEffectSuite {
 
   private val jettyServer = ResourceFixture[Server](serverR)
 
-  private def get(server: Server, path: String): IO[String] =
-    Resource
-      .make(
-        IO.blocking(
-          Source
-            .fromURL(new URL(s"http://127.0.0.1:${server.address.getPort}$path"))
-        )
-      )(source => IO(source.close()))
-      .use { source =>
-        IO.blocking(source.getLines().mkString)
-      }
+  private def fetchBody(req: Request): IO[String] =
+    IO.async_ { cb =>
+      val listener = new BufferingResponseListener() {
+        override def onFailure(resp: Response, t: Throwable) =
+          cb(Left(t))
 
-  private def post(server: Server, path: String, body: String): IO[String] =
-    IO.blocking {
-      val url = new URL(s"http://127.0.0.1:${server.address.getPort}$path")
-      val conn = url.openConnection().asInstanceOf[HttpURLConnection]
-      val bytes = body.getBytes(StandardCharsets.UTF_8)
-      conn.setRequestMethod("POST")
-      conn.setRequestProperty("Content-Length", bytes.size.toString)
-      conn.setDoOutput(true)
-      conn.getOutputStream.write(bytes)
-      conn
-    }.flatMap { conn =>
-      Resource
-        .make(
-          IO.blocking(Source.fromInputStream(conn.getInputStream, StandardCharsets.UTF_8.name))
-        )(source => IO(source.close()))
-        .use { source =>
-          IO.blocking(source.getLines().mkString)
-        }
+        override def onComplete(result: Result) =
+          cb(Right(getContentAsString))
+      }
+      req.send(listener)
     }
+
+  private def get(server: Server, path: String): IO[String] = {
+    val req = client().newRequest(s"http://127.0.0.1:${server.address.getPort}$path")
+    fetchBody(req)
+  }
+
+  private def post(server: Server, path: String, body: String): IO[String] = {
+    val req = client()
+      .newRequest(s"http://127.0.0.1:${server.address.getPort}$path")
+      .method("POST")
+      .content(new StringContentProvider(body))
+    fetchBody(req)
+  }
 
   jettyServer.test("ChannelOptions should route requests on the service executor") { server =>
     get(server, "/thread/routing").map(_.startsWith("io-compute-")).assert
@@ -115,8 +117,8 @@ class JettyServerSuite extends CatsEffectSuite {
     get(server, "/slow").assertEquals("slow")
   }
 
-  jettyServer.test("Timeout should fire on timeout".flaky) { server =>
-    get(server, "/never").intercept[IOException]
+  jettyServer.test("Timeout should fire on timeout") { server =>
+    get(server, "/never").map(_.contains("Error 500 AsyncContext timeout"))
   }
 
   jettyServer.test("Timeout should execute the service task on the service executor") { server =>
