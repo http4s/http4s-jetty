@@ -24,7 +24,7 @@ import cats.syntax.all._
 import fs2._
 import org.eclipse.jetty.client.util.DeferredContentProvider
 import org.eclipse.jetty.util.{Callback => JettyCallback}
-import org.http4s.internal.loggingAsyncCallback
+import org.http4s.jetty.client.internal.loggingAsyncCallback
 import org.log4s.getLogger
 
 private[jetty] final case class StreamRequestContentProvider[F[_]](s: Semaphore[F])(implicit
