@@ -54,6 +54,7 @@ import javax.net.ssl.SSLParameters
 import javax.servlet.DispatcherType
 import javax.servlet.Filter
 import javax.servlet.http.HttpServlet
+import scala.annotation.nowarn
 import scala.collection.immutable
 import scala.concurrent.duration._
 
@@ -203,10 +204,11 @@ sealed class JettyBuilder[F[_]] private (
   def mountService(service: HttpRoutes[F], prefix: String): Self =
     mountHttpApp(service.orNotFound, prefix)
 
+  @nowarn("cat=deprecation")
   def mountHttpApp(service: HttpApp[F], prefix: String): Self =
     copy(mounts = mounts :+ Mount[F] { (context, index, builder, dispatcher) =>
       val servlet = new AsyncHttp4sServlet(
-        service = service,
+        httpApp = service,
         asyncTimeout = builder.asyncTimeout,
         servletIo = builder.servletIo,
         serviceErrorHandler = builder.serviceErrorHandler,
@@ -325,7 +327,7 @@ sealed class JettyBuilder[F[_]] private (
           }
         )
     for {
-      dispatcher <- Dispatcher[F]
+      dispatcher <- Dispatcher.parallel[F]
       threadPool <- threadPoolR
       server <- serverR(threadPool, dispatcher)
       _ <- Resource.eval(banner.traverse_(value => F.delay(logger.info(value))))
