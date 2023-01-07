@@ -52,7 +52,7 @@ import java.util
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLParameters
 import javax.servlet.DispatcherType
-import javax.servlet.Filter
+import javax.servlet.http.HttpFilter
 import javax.servlet.http.HttpServlet
 import scala.annotation.nowarn
 import scala.collection.immutable
@@ -189,7 +189,7 @@ sealed class JettyBuilder[F[_]] private (
     })
 
   override def mountFilter(
-      filter: Filter,
+      filter: HttpFilter,
       urlMapping: String,
       name: Option[String],
       dispatches: util.EnumSet[DispatcherType],

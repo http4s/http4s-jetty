@@ -25,7 +25,6 @@ import fs2._
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.{Request => JettyRequest}
 import org.eclipse.jetty.http.{HttpVersion => JHttpVersion}
-import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.http4s.client.Client
 import org.log4s.Logger
 import org.log4s.getLogger
@@ -39,19 +38,19 @@ object JettyClient {
 
   def resource[F[_]](
       client: HttpClient = defaultHttpClient()
-  )(implicit F: Async[F]): Resource[F, Client[F]] = Dispatcher.parallel[F].flatMap { implicit D =>
+  )(implicit F: Async[F]): Resource[F, Client[F]] = Dispatcher.parallel[F].flatMap { dispatcher =>
     val acquire = F
       .pure(client)
       .flatTap(client => F.delay(client.start()))
       .map(client =>
         Client[F] { req =>
           Resource.suspend(F.async[Resource[F, Response[F]]] { cb =>
-            F.bracket(StreamRequestContentProvider()) { dcp =>
+            F.bracket(StreamRequestContent[F](dispatcher)) { dcp =>
               (for {
                 jReq <- F.catchNonFatal(toJettyRequest(client, req, dcp))
-                rl <- ResponseListener(cb)
+                rl <- ResponseListener(cb, dispatcher)
                 _ <- F.delay(jReq.send(rl))
-                _ <- dcp.write(req)
+                _ <- dcp.write(req.body)
               } yield Option.empty[F[Unit]]).recover { case e =>
                 cb(Left(e))
                 Option.empty[F[Unit]]
@@ -75,8 +74,7 @@ object JettyClient {
     Stream.resource(resource(client))
 
   def defaultHttpClient(): HttpClient = {
-    val sslCtxFactory = new SslContextFactory.Client();
-    val c = new HttpClient(sslCtxFactory)
+    val c = new HttpClient()
     c.setFollowRedirects(false)
     c.setDefaultRequestContentType(null)
     c
@@ -85,7 +83,7 @@ object JettyClient {
   private def toJettyRequest[F[_]](
       client: HttpClient,
       request: Request[F],
-      dcp: StreamRequestContentProvider[F],
+      dcp: StreamRequestContent[F],
   ): JettyRequest = {
     val jReq = client
       .newRequest(request.uri.toString)
@@ -98,9 +96,10 @@ object JettyClient {
           case _ => JHttpVersion.HTTP_1_1
         }
       )
-
-    for (h <- request.headers.headers if h.isNameValid)
-      jReq.header(h.name.toString, h.value)
-    jReq.content(dcp)
+    jReq.headers { jettyHeaders =>
+      for (h <- request.headers.headers if h.isNameValid)
+        jettyHeaders.add(h.name.toString, h.value)
+    }
+    jReq.body(dcp)
   }
 }
