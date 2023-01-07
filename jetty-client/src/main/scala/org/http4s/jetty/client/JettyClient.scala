@@ -39,7 +39,7 @@ object JettyClient {
 
   def resource[F[_]](
       client: HttpClient = defaultHttpClient()
-  )(implicit F: Async[F]): Resource[F, Client[F]] = Dispatcher[F].flatMap { implicit D =>
+  )(implicit F: Async[F]): Resource[F, Client[F]] = Dispatcher.parallel[F].flatMap { implicit D =>
     val acquire = F
       .pure(client)
       .flatTap(client => F.delay(client.start()))
