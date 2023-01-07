@@ -28,7 +28,6 @@ import org.eclipse.jetty.client.api.Response
 import org.eclipse.jetty.client.api.Result
 import org.eclipse.jetty.client.util.BufferingResponseListener
 import org.eclipse.jetty.client.util.StringContentProvider
-
 import org.http4s.dsl.io._
 import org.http4s.server.Server
 
@@ -44,7 +43,7 @@ class JettyServerSuite extends CatsEffectSuite {
       Resource.make(IO(new HttpClient()))(c => IO(c.stop())).evalTap(c => IO(c.start())),
     )
 
-  override def munitFixtures = List(client)
+  override def munitFixtures: List[Fixture[HttpClient]] = List(client)
 
   private val serverR =
     builder
