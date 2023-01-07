@@ -24,8 +24,8 @@ lazy val root = project
   .aggregate(jettyServer, jettyClient)
 
 val jettyVersion = "9.4.50.v20221201"
-val http4sVersion = "0.23.12"
-val http4sServletVersion = "0.23.11"
+val http4sVersion = "0.23.17"
+val http4sServletVersion = "0.23.13"
 val munitCatsEffectVersion = "1.0.7"
 val slf4jVersion = "1.7.25"
 
@@ -36,6 +36,7 @@ lazy val jettyServer = project
     description := "Jetty implementation for http4s servers",
     startYear := Some(2014),
     libraryDependencies ++= Seq(
+      "org.eclipse.jetty" % "jetty-client" % jettyVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
       "org.eclipse.jetty.http2" % "http2-server" % jettyVersion,
