@@ -1,3 +1,5 @@
+import org.typelevel.sbt.gha
+
 // https://typelevel.org/sbt-typelevel/faq.html#what-is-a-base-version-anyway
 ThisBuild / tlBaseVersion := "0.23" // your current series x.y
 ThisBuild / tlMimaPreviousVersions ++= (0 to 11).map(y => s"0.23.$y").toSet
@@ -14,6 +16,10 @@ ThisBuild / tlSitePublishBranch := Some("main")
 val Scala213 = "2.13.8"
 ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.17", "3.2.0")
 ThisBuild / scalaVersion := Scala213 // the default Scala
+ThisBuild / githubWorkflowJavaVersions ~= {
+  // Jetty 10 bumps the requirement to Java 11
+  _.filter { case JavaSpec(_, major) => major.toInt >= 11 }
+}
 
 ThisBuild / resolvers +=
   "s01 snapshots".at("https://s01.oss.sonatype.org/content/repositories/snapshots/")
