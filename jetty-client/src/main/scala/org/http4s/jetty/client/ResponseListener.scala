@@ -30,8 +30,8 @@ import org.eclipse.jetty.http.HttpFields
 import org.eclipse.jetty.http.{HttpVersion => JHttpVersion}
 import org.eclipse.jetty.util.{Callback => JettyCallback}
 import org.http4s.internal.CollectionCompat.CollectionConverters._
-import org.http4s.internal.loggingAsyncCallback
 import org.http4s.jetty.client.ResponseListener.Item
+import org.http4s.jetty.client.internal.loggingAsyncCallback
 import org.log4s.getLogger
 
 import java.nio.ByteBuffer
@@ -39,7 +39,8 @@ import java.nio.ByteBuffer
 private[jetty] final case class ResponseListener[F[_]](
     queue: Queue[F, Option[Item]],
     cb: Callback[Resource[F, Response[F]]],
-)(implicit F: Async[F], D: Dispatcher[F])
+    dispatcher: Dispatcher[F],
+)(implicit F: Async[F])
     extends JettyResponse.Listener.Adapter {
   import ResponseListener.logger
 
@@ -69,7 +70,9 @@ private[jetty] final case class ResponseListener[F[_]](
       }
       .leftMap { t => abort(t, response); t }
 
-    D.unsafeRunAndForget(F.delay(cb(r)).attempt.flatMap(loggingAsyncCallback[F, Unit](logger)))
+    dispatcher.unsafeRunAndForget(
+      F.delay(cb(r)).attempt.flatMap(loggingAsyncCallback[F, Unit](logger))
+    )
   }
 
   private def getHttpVersion(version: JHttpVersion): HttpVersion =
@@ -100,7 +103,7 @@ private[jetty] final case class ResponseListener[F[_]](
   override def onFailure(response: JettyResponse, failure: Throwable): Unit =
     if (responseSent) enqueue(Item.Raise(failure))(_ => F.unit)
     else
-      D.unsafeRunAndForget(
+      dispatcher.unsafeRunAndForget(
         F.delay(cb(Left(failure))).attempt.flatMap(loggingAsyncCallback[F, Unit](logger))
       )
 
@@ -122,7 +125,7 @@ private[jetty] final case class ResponseListener[F[_]](
     enqueue(Item.Done)(loggingAsyncCallback[F, Unit](logger))
 
   private def enqueue(item: Item)(cb: Either[Throwable, Unit] => F[Unit]): Unit =
-    D.unsafeRunAndForget(queue.offer(item.some).attempt.flatMap(cb))
+    dispatcher.unsafeRunAndForget(queue.offer(item.some).attempt.flatMap(cb))
 }
 
 private[jetty] object ResponseListener {
@@ -138,9 +141,10 @@ private[jetty] object ResponseListener {
   private val logger = getLogger
 
   def apply[F[_]](
-      cb: Callback[Resource[F, Response[F]]]
-  )(implicit F: Async[F], D: Dispatcher[F]): F[ResponseListener[F]] =
+      cb: Callback[Resource[F, Response[F]]],
+      dispatcher: Dispatcher[F],
+  )(implicit F: Async[F]): F[ResponseListener[F]] =
     Queue
       .synchronous[F, Option[Item]]
-      .map(q => ResponseListener(q, cb))
+      .map(q => ResponseListener(q, cb, dispatcher))
 }

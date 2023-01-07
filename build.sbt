@@ -1,6 +1,6 @@
-// https://typelevel.org/sbt-typelevel/faq.html#what-is-a-base-version-anyway
-ThisBuild / tlBaseVersion := "0.23" // your current series x.y
-ThisBuild / tlMimaPreviousVersions ++= (0 to 11).map(y => s"0.23.$y").toSet
+import org.typelevel.sbt.gha
+
+ThisBuild / tlBaseVersion := "0.24" // your current series x.y
 
 ThisBuild / licenses := Seq(License.Apache2)
 ThisBuild / developers := List(
@@ -14,6 +14,10 @@ ThisBuild / tlSitePublishBranch := Some("main")
 val Scala213 = "2.13.8"
 ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.17", "3.2.0")
 ThisBuild / scalaVersion := Scala213 // the default Scala
+ThisBuild / githubWorkflowJavaVersions ~= {
+  // Jetty 10 bumps the requirement to Java 11
+  _.filter { case JavaSpec(_, major) => major.toInt >= 11 }
+}
 
 ThisBuild / resolvers +=
   "s01 snapshots".at("https://s01.oss.sonatype.org/content/repositories/snapshots/")
@@ -23,9 +27,9 @@ lazy val root = project
   .enablePlugins(NoPublishPlugin)
   .aggregate(jettyServer, jettyClient)
 
-val jettyVersion = "9.4.49.v20220914"
-val http4sVersion = "0.23.12"
-val http4sServletVersion = "0.23.11"
+val jettyVersion = "10.0.13"
+val http4sVersion = "0.23.17"
+val http4sServletVersion = "0.24.0-M2"
 val munitCatsEffectVersion = "1.0.7"
 val slf4jVersion = "1.7.25"
 
@@ -36,6 +40,7 @@ lazy val jettyServer = project
     description := "Jetty implementation for http4s servers",
     startYear := Some(2014),
     libraryDependencies ++= Seq(
+      "org.eclipse.jetty" % "jetty-client" % jettyVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
       "org.eclipse.jetty.http2" % "http2-server" % jettyVersion,

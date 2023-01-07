@@ -22,19 +22,21 @@ import cats.effect._
 import cats.effect.std._
 import cats.syntax.all._
 import fs2._
-import org.eclipse.jetty.client.util.DeferredContentProvider
+import org.eclipse.jetty.client.util.AsyncRequestContent
 import org.eclipse.jetty.util.{Callback => JettyCallback}
-import org.http4s.internal.loggingAsyncCallback
+import org.http4s.jetty.client.internal.loggingAsyncCallback
 import org.log4s.getLogger
 
-private[jetty] final case class StreamRequestContentProvider[F[_]](s: Semaphore[F])(implicit
-    F: Async[F],
-    D: Dispatcher[F],
-) extends DeferredContentProvider {
-  import StreamRequestContentProvider.logger
+private[jetty] class StreamRequestContent[F[_]] private (
+    s: Semaphore[F],
+    dispatcher: Dispatcher[F],
+)(implicit
+    F: Async[F]
+) extends AsyncRequestContent {
+  import StreamRequestContent.logger
 
-  def write(req: Request[F]): F[Unit] =
-    req.body.chunks
+  def write(body: Stream[F, Byte]): F[Unit] =
+    body.chunks
       .through(pipe)
       .compile
       .drain
@@ -53,13 +55,15 @@ private[jetty] final case class StreamRequestContentProvider[F[_]](s: Semaphore[
 
   private val callback: JettyCallback = new JettyCallback {
     override def succeeded(): Unit =
-      D.unsafeRunAndForget(s.release.attempt.flatMap(loggingAsyncCallback[F, Unit](logger)))
+      dispatcher.unsafeRunAndForget(
+        s.release.attempt.flatMap(loggingAsyncCallback[F, Unit](logger))
+      )
   }
 }
 
-private[jetty] object StreamRequestContentProvider {
+private[jetty] object StreamRequestContent {
   private val logger = getLogger
 
-  def apply[F[_]: Async: Dispatcher](): F[StreamRequestContentProvider[F]] =
-    Semaphore[F](1).map(StreamRequestContentProvider(_))
+  def apply[F[_]: Async](dispatcher: Dispatcher[F]): F[StreamRequestContent[F]] =
+    Semaphore[F](1).map(new StreamRequestContent(_, dispatcher))
 }
