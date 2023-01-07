@@ -22,6 +22,9 @@ import cats.effect._
 import cats.effect.kernel.Async
 import cats.effect.std.Dispatcher
 import cats.syntax.all._
+import jakarta.servlet.DispatcherType
+import jakarta.servlet.http.HttpFilter
+import jakarta.servlet.http.HttpServlet
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
@@ -51,9 +54,6 @@ import java.net.InetSocketAddress
 import java.util
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLParameters
-import javax.servlet.DispatcherType
-import javax.servlet.http.HttpFilter
-import javax.servlet.http.HttpServlet
 import scala.annotation.nowarn
 import scala.collection.immutable
 import scala.concurrent.duration._
