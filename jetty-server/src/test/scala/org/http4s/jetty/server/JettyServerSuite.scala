@@ -27,7 +27,7 @@ import org.eclipse.jetty.client.api.Request
 import org.eclipse.jetty.client.api.Response
 import org.eclipse.jetty.client.api.Result
 import org.eclipse.jetty.client.util.BufferingResponseListener
-import org.eclipse.jetty.client.util.StringContentProvider
+import org.eclipse.jetty.client.util.StringRequestContent
 import org.http4s.dsl.io._
 import org.http4s.server.Server
 
@@ -94,7 +94,7 @@ class JettyServerSuite extends CatsEffectSuite {
     val req = client()
       .newRequest(s"http://127.0.0.1:${server.address.getPort}$path")
       .method("POST")
-      .content(new StringContentProvider(body))
+      .body(new StringRequestContent(body))
     fetchBody(req)
   }
 
