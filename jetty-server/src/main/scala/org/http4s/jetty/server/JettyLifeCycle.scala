@@ -56,7 +56,7 @@ private[jetty] object JettyLifeCycle {
     */
   private[this] def stopLifeCycle[F[_]](lifeCycle: LifeCycle)(implicit F: Async[F]): F[Unit] =
     F.async_[Unit] { cb =>
-      lifeCycle.addLifeCycleListener(
+      lifeCycle.addEventListener(
         new LifeCycle.Listener {
           override def lifeCycleStopped(a: LifeCycle): Unit =
             cb(Right(()))
@@ -96,7 +96,7 @@ private[jetty] object JettyLifeCycle {
     */
   private[this] def startLifeCycle[F[_]](lifeCycle: LifeCycle)(implicit F: Async[F]): F[Unit] =
     F.async_[Unit] { cb =>
-      lifeCycle.addLifeCycleListener(
+      lifeCycle.addEventListener(
         new LifeCycle.Listener {
           override def lifeCycleStarted(a: LifeCycle): Unit =
             cb(Right(()))

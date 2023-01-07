@@ -18,8 +18,7 @@
           imports = [ typelevel-nix.typelevelShell ];
           name = "http4s-jetty-shell";
           typelevelShell = {
-            jdk.package = pkgs.jdk8;
-            nodejs.enable = true;
+            jdk.package = pkgs.jdk11;
           };
         };
       }
