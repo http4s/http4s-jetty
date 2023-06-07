@@ -12,7 +12,7 @@ ThisBuild / developers := List(
 ThisBuild / tlSitePublishBranch := Some("main")
 
 val Scala213 = "2.13.10"
-ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.17", "3.3.0")
+ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.18", "3.3.0")
 ThisBuild / scalaVersion := Scala213 // the default Scala
 ThisBuild / githubWorkflowJavaVersions ~= {
   // Jetty 10 bumps the requirement to Java 11
