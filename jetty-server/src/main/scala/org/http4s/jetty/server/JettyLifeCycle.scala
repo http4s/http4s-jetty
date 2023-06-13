@@ -56,15 +56,18 @@ private[jetty] object JettyLifeCycle {
     */
   private[this] def stopLifeCycle[F[_]](lifeCycle: LifeCycle)(implicit F: Async[F]): F[Unit] =
     F.async[Unit] { cb =>
+      val listener = new LifeCycle.Listener {
+        override def lifeCycleStopped(a: LifeCycle): Unit = {
+          cb(Right(()))
+          lifeCycle.removeLifeCycleListener(this)
+        }
+        override def lifeCycleFailure(a: LifeCycle, error: Throwable): Unit = {
+          cb(Left(error))
+          lifeCycle.removeLifeCycleListener(this)
+        }
+      }
+
       F.delay {
-        val listener =
-          new LifeCycle.Listener {
-            override def lifeCycleStopped(a: LifeCycle): Unit =
-              cb(Right(()))
-            override def lifeCycleFailure(a: LifeCycle, error: Throwable): Unit =
-              cb(Left(error))
-          }
-        lifeCycle.addLifeCycleListener(listener)
 
         // In the general case, it is not sufficient to merely call stop(). For
         // example, the concrete implementation of stop() for the canonical
@@ -85,10 +88,10 @@ private[jetty] object JettyLifeCycle {
           // and then wait for the event. It is imperative that we add the
           // listener beforehand here. Otherwise we have some very annoying race
           // conditions.
+          lifeCycle.addLifeCycleListener(listener)
           lifeCycle.stop()
         }
-        Some(F.delay(lifeCycle.removeLifeCycleListener(listener)))
-      }
+      }.as(Some(F.delay(lifeCycle.removeLifeCycleListener(listener))))
     }
 
   /** Attempt to [[org.eclipse.jetty.util.component.LifeCycle#start]] on a
@@ -99,15 +102,18 @@ private[jetty] object JettyLifeCycle {
     */
   private[this] def startLifeCycle[F[_]](lifeCycle: LifeCycle)(implicit F: Async[F]): F[Unit] =
     F.async[Unit] { cb =>
-      F.delay {
-        val listener = new LifeCycle.Listener {
-          override def lifeCycleStarted(a: LifeCycle): Unit =
-            cb(Right(()))
-          override def lifeCycleFailure(a: LifeCycle, error: Throwable): Unit =
-            cb(Left(error))
+      val listener = new LifeCycle.Listener {
+        override def lifeCycleStarted(a: LifeCycle): Unit = {
+          cb(Right(()))
+          lifeCycle.removeLifeCycleListener(this)
         }
-        lifeCycle.addLifeCycleListener(listener)
+        override def lifeCycleFailure(a: LifeCycle, error: Throwable): Unit = {
+          cb(Left(error))
+          lifeCycle.removeLifeCycleListener(this)
+        }
+      }
 
+      F.delay {
         // Sanity check to ensure the LifeCycle component is not already
         // started. A couple of notes here.
         //
@@ -142,9 +148,9 @@ private[jetty] object JettyLifeCycle {
             )
           )
         } else {
+          lifeCycle.addLifeCycleListener(listener)
           lifeCycle.start()
         }
-        Some(F.delay(lifeCycle.removeLifeCycleListener(listener)))
-      }
+      }.as(Some(F.delay(lifeCycle.removeLifeCycleListener(listener))))
     }
 }
