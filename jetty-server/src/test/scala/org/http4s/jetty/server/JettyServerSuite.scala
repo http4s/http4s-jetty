@@ -74,15 +74,17 @@ class JettyServerSuite extends CatsEffectSuite {
   private val jettyServer = ResourceFixture[Server](serverR)
 
   private def fetchBody(req: Request): IO[String] =
-    IO.async_ { cb =>
-      val listener = new BufferingResponseListener() {
-        override def onFailure(resp: Response, t: Throwable) =
-          cb(Left(t))
+    IO.async { cb =>
+      IO {
+        val listener = new BufferingResponseListener() {
+          override def onFailure(resp: Response, t: Throwable) =
+            cb(Left(t))
 
-        override def onComplete(result: Result) =
-          cb(Right(getContentAsString))
-      }
-      req.send(listener)
+          override def onComplete(result: Result) =
+            cb(Right(getContentAsString))
+        }
+        req.send(listener)
+      }.as(Some(IO.unit))
     }
 
   private def get(server: Server, path: String): IO[String] = {
