@@ -69,7 +69,18 @@ class JettyServerSuite extends CatsEffectSuite {
   private val jettyServer = ResourceFixture[Server](serverR)
 
   private def fetchBody(req: Request): IO[String] =
-    IO.interruptible(req.send().getContentAsString())
+    IO.async { cb =>
+      IO {
+        val listener = new BufferingResponseListener() {
+          override def onFailure(resp: Response, t: Throwable) =
+            cb(Left(t))
+
+          override def onComplete(result: Result) =
+            cb(Right(getContentAsString))
+        }
+        req.send(listener)
+      }.as(Some(IO.unit))
+    }
 
   private def get(server: Server, path: String): IO[String] = {
     val req = client().newRequest(s"http://127.0.0.1:${server.address.getPort}$path")
