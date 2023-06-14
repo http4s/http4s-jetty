@@ -52,10 +52,11 @@ object JettyClient {
                 rl <- ResponseListener(cb)
                 _ <- F.delay(jReq.send(rl))
                 _ <- dcp.write(req)
-              } yield Option.empty[F[Unit]]).recover { case e =>
-                cb(Left(e))
-                Option.empty[F[Unit]]
-              }
+              } yield ())
+                .recover { case e =>
+                  cb(Left(e))
+                }
+                .as(F.delay(dcp.close()).some)
             } { dcp =>
               F.delay(dcp.close())
             }
