@@ -18,11 +18,16 @@ package org.http4s
 package jetty
 package server
 
-import cats.effect.{IO, Resource, Temporal}
+import cats.effect.IO
+import cats.effect.Resource
+import cats.effect.Temporal
 import munit.CatsEffectSuite
 import org.eclipse.jetty.client.HttpClient
-import org.eclipse.jetty.client.api.{Request, Response, Result}
-import org.eclipse.jetty.client.util.{BufferingResponseListener, StringContentProvider}
+import org.eclipse.jetty.client.api.Request
+import org.eclipse.jetty.client.api.Response
+import org.eclipse.jetty.client.api.Result
+import org.eclipse.jetty.client.util.BufferingResponseListener
+import org.eclipse.jetty.client.util.StringContentProvider
 import org.http4s.dsl.io._
 import org.http4s.server.Server
 

@@ -18,7 +18,8 @@ package org.http4s.jetty.server
 
 import cats.effect._
 import cats.syntax.all._
-import org.eclipse.jetty.util.component.{Destroyable, LifeCycle}
+import org.eclipse.jetty.util.component.Destroyable
+import org.eclipse.jetty.util.component.LifeCycle
 
 private[jetty] object JettyLifeCycle {
 
