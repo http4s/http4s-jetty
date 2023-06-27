@@ -62,7 +62,7 @@ class JettyServerSuite extends CatsEffectSuite {
             Ok(req.body)
 
           case GET -> Root / "never" =>
-            IO.never
+            IO.async(_ => IO.pure(Some(IO.unit)))
 
           case GET -> Root / "slow" =>
             Temporal[IO].sleep(50.millis) *> Ok("slow")
