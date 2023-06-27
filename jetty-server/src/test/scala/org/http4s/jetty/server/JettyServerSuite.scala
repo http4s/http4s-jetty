@@ -18,15 +18,10 @@ package org.http4s
 package jetty
 package server
 
-import cats.effect.IO
-import cats.effect.Resource
-import cats.effect.Temporal
+import cats.effect.{IO, Resource, Temporal}
 import munit.CatsEffectSuite
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Request
-import org.eclipse.jetty.client.api.Response
-import org.eclipse.jetty.client.api.Result
-import org.eclipse.jetty.client.util.BufferingResponseListener
 import org.eclipse.jetty.client.util.StringContentProvider
 import org.http4s.dsl.io._
 import org.http4s.server.Server
@@ -74,18 +69,7 @@ class JettyServerSuite extends CatsEffectSuite {
   private val jettyServer = ResourceFixture[Server](serverR)
 
   private def fetchBody(req: Request): IO[String] =
-    IO.async { cb =>
-      IO {
-        val listener = new BufferingResponseListener() {
-          override def onFailure(resp: Response, t: Throwable) =
-            cb(Left(t))
-
-          override def onComplete(result: Result) =
-            cb(Right(getContentAsString))
-        }
-        req.send(listener)
-      }.as(Some(IO.unit))
-    }
+    IO.interruptible(req.send().getContentAsString())
 
   private def get(server: Server, path: String): IO[String] = {
     val req = client().newRequest(s"http://127.0.0.1:${server.address.getPort}$path")
