@@ -70,7 +70,10 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
           )
         )
         .flatMap {
-          case Right(()) => F.delay(ctx.complete)
+          case Right(()) =>
+            F.delay(println("Completing on " + Thread.currentThread.getName)) >> F.delay(
+              ctx.complete
+            )
           case Left(t) => errorHandler(servletRequest, servletResponse)(t)
         }
       dispatcher.unsafeRunAndForget(result)
@@ -132,10 +135,7 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
 
   private class AsyncTimeoutHandler(cb: Callback[Response[F]]) extends AbstractAsyncListener {
     override def onTimeout(event: AsyncEvent): Unit = {
-      val req = event.getAsyncContext.getRequest.asInstanceOf[HttpServletRequest]
-      System.err.println(
-        s"Request timed out: ${req.getMethod} ${req.getServletPath}${req.getPathInfo}"
-      )
+      println("Timing out on " + Thread.currentThread.getName)
       cb(Right(Response.timeout[F]))
     }
   }
