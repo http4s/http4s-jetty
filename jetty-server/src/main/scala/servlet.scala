@@ -96,11 +96,9 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
         gate.get *>
           F.defer(serviceFn(request))
             .recoverWith(t =>
-              F.delay(
-                F.delay(println("ohnoes")) >> F.delay(t.printStackTrace()) >> serviceErrorHandler(
-                  request
-                )
-              )
+              F.delay(println("ohnoes")) >> F.delay(t.printStackTrace()) >> serviceErrorHandler(
+                request
+              )(t)
             )
       val servletResponse = ctx.getResponse.asInstanceOf[HttpServletResponse]
       F.race(timeout, response).flatMap(r => renderResponse(r.merge, servletResponse, bodyWriter))
@@ -134,7 +132,7 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
 
   private class AsyncTimeoutHandler(cb: Callback[Response[F]]) extends AbstractAsyncListener {
     override def onTimeout(event: AsyncEvent): Unit = {
-      val req = event.getzAsyncContext.getRequest.asInstanceOf[HttpServletRequest]
+      val req = event.getAsyncContext.getRequest.asInstanceOf[HttpServletRequest]
       System.err.println(
         s"Request timed out: ${req.getMethod} ${req.getServletPath}${req.getPathInfo}"
       )
