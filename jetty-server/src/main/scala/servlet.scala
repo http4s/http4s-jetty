@@ -70,10 +70,7 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
           )
         )
         .flatMap {
-          case Right(()) =>
-            F.delay(println("Completing on " + Thread.currentThread.getName)) >> F.delay(
-              ctx.complete
-            )
+          case Right(()) => F.delay(ctx.complete)
           case Left(t) => errorHandler(servletRequest, servletResponse)(t)
         }
       dispatcher.unsafeRunAndForget(result)
@@ -98,11 +95,7 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
       val response =
         gate.get *>
           F.defer(serviceFn(request))
-            .recoverWith(t =>
-              F.delay(println("ohnoes")) >> F.delay(t.printStackTrace()) >> serviceErrorHandler(
-                request
-              )(t)
-            )
+            .recoverWith(serviceErrorHandler(request))
       val servletResponse = ctx.getResponse.asInstanceOf[HttpServletResponse]
       F.race(timeout, response).flatMap(r => renderResponse(r.merge, servletResponse, bodyWriter))
     }
@@ -120,10 +113,8 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
       // anyway, so we use a NullBodyWriter.
       val f = renderResponse(response, servletResponse, nullBodyWriter) *>
         F.delay(
-          if (servletRequest.isAsyncStarted) {
-            println("Completing with Internal Server Error")
+          if (servletRequest.isAsyncStarted)
             servletRequest.getAsyncContext.complete()
-          }
         )
       F.delay(logger.error(t)("Error processing request")) *> F
         .attempt(f)
@@ -135,7 +126,8 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
 
   private class AsyncTimeoutHandler(cb: Callback[Response[F]]) extends AbstractAsyncListener {
     override def onTimeout(event: AsyncEvent): Unit = {
-      println("Timing out on " + Thread.currentThread.getName)
+      val req = event.getAsyncContext.getRequest.asInstanceOf[HttpServletRequest]
+      logger.info(s"Request timed out: ${req.getMethod} ${req.getServletPath}${req.getPathInfo}")
       cb(Right(Response.timeout[F]))
     }
   }
