@@ -62,17 +62,16 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
       ctx.setTimeout(asyncTimeoutMillis)
       // Must be done on the container thread for Tomcat's sake when using async I/O.
       val bodyWriter = servletIo.initWriter(servletResponse)
-      val result = F
-        .attempt(
-          toRequest(servletRequest).fold(
+      val result =
+        toRequest(servletRequest)
+          .fold(
             onParseFailure(_, servletResponse, bodyWriter),
             handleRequest(ctx, _, bodyWriter),
           )
-        )
-        .flatMap {
-          case Right(()) => F.delay(ctx.complete)
-          case Left(t) => errorHandler(servletRequest, servletResponse)(t)
-        }
+          .redeemWith(
+            errorHandler(servletRequest, servletResponse),
+            _ => F.delay(ctx.complete()),
+          )
       dispatcher.unsafeRunAndForget(result)
     } catch errorHandler(servletRequest, servletResponse).andThen(dispatcher.unsafeRunSync _)
 
