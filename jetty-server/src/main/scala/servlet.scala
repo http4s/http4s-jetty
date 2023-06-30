@@ -113,8 +113,10 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
       // anyway, so we use a NullBodyWriter.
       val f = renderResponse(response, servletResponse, nullBodyWriter) *>
         F.delay(
-          if (servletRequest.isAsyncStarted)
+          if (servletRequest.isAsyncStarted) {
+            println("Completing with Internal Server Error")
             servletRequest.getAsyncContext.complete()
+          }
         )
       F.delay(logger.error(t)("Error processing request")) *> F
         .attempt(f)
@@ -126,7 +128,7 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
 
   private class AsyncTimeoutHandler(cb: Callback[Response[F]]) extends AbstractAsyncListener {
     override def onTimeout(event: AsyncEvent): Unit = {
-      val req = event.getAsyncContext.getRequest.asInstanceOf[HttpServletRequest]
+      val req = event.getzAsyncContext.getRequest.asInstanceOf[HttpServletRequest]
       System.err.println(
         s"Request timed out: ${req.getMethod} ${req.getServletPath}${req.getPathInfo}"
       )
