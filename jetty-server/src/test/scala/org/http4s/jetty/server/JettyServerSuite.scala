@@ -22,6 +22,9 @@ import cats.effect.{IO, Resource, Temporal}
 import munit.CatsEffectSuite
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Request
+import org.eclipse.jetty.client.api.Response
+import org.eclipse.jetty.client.api.Result
+import org.eclipse.jetty.client.util.BufferingResponseListener
 import org.eclipse.jetty.client.util.StringContentProvider
 import org.http4s.dsl.io._
 import org.http4s.server.Server
