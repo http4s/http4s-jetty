@@ -114,7 +114,7 @@ class JettyServerSuite extends CatsEffectSuite {
   }
 
   jettyServer.test("Timeout should fire on timeout") { server =>
-    get(server, "/never").map{_.contains("Error 500 AsyncContext timeout")}
+    get(server, "/never").map(_.contains("Error 500 AsyncContext timeout"))
   }
 
   jettyServer.test("Timeout should execute the service task on the service executor") { server =>
