@@ -97,7 +97,9 @@ class AsyncHttp4sServlet[F[_]] @deprecated("Use AsyncHttp4sServlet.builder", "0.
           F.defer(serviceFn(request))
             .recoverWith(t =>
               F.delay(
-                println("ohnoes") >> F.delay(t.printStackTrace()) >> serviceErrorHandler(request)
+                F.delay(println("ohnoes")) >> F.delay(t.printStackTrace()) >> serviceErrorHandler(
+                  request
+                )
               )
             )
       val servletResponse = ctx.getResponse.asInstanceOf[HttpServletResponse]
