@@ -24,8 +24,8 @@ lazy val root = project
   .aggregate(jettyServer, jettyClient)
 
 val jettyVersion = "9.4.50.v20221201"
-val http4sVersion = "0.23.21"
-val http4sServletVersion = "0.23.15-RC1"
+val http4sVersion = "0.23.22"
+val http4sServletVersion = "0.23.15"
 val munitCatsEffectVersion = "1.0.7"
 val slf4jVersion = "1.7.25"
 
