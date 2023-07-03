@@ -12,7 +12,7 @@ ThisBuild / developers := List(
 ThisBuild / tlSitePublishBranch := Some("main")
 
 val Scala213 = "2.13.8"
-ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.17", "3.2.0")
+ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.17", "3.3.0")
 ThisBuild / scalaVersion := Scala213 // the default Scala
 
 ThisBuild / resolvers +=
@@ -24,8 +24,8 @@ lazy val root = project
   .aggregate(jettyServer, jettyClient)
 
 val jettyVersion = "9.4.50.v20221201"
-val http4sVersion = "0.23.17"
-val http4sServletVersion = "0.23.13"
+val http4sVersion = "0.23.22"
+val http4sServletVersion = "0.23.15"
 val munitCatsEffectVersion = "1.0.7"
 val slf4jVersion = "1.7.25"
 
