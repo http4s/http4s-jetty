@@ -80,7 +80,9 @@ lazy val jettyClient = project
     ),
   )
 
-lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)
+lazy val docs = project
+  .in(file("site"))
+  .enablePlugins(Http4sOrgSitePlugin)
 
 val jettyApiMappings: Setting[_] =
   doc / apiMappings ++= (Compile / fullClasspath).value
