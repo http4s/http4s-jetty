@@ -12,7 +12,7 @@ ThisBuild / developers := List(
 ThisBuild / tlSitePublishBranch := Some("main")
 
 val Scala213 = "2.13.11"
-ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.18", "3.3.0")
+ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.19", "3.3.0")
 ThisBuild / scalaVersion := Scala213 // the default Scala
 ThisBuild / githubWorkflowJavaVersions ~= {
   // Jetty 10 bumps the requirement to Java 11
@@ -28,7 +28,7 @@ lazy val root = project
   .aggregate(jettyServer, jettyClient)
 
 val jettyVersion = "10.0.15"
-val http4sVersion = "0.23.25"
+val http4sVersion = "0.23.27"
 val http4sServletVersion = "0.24.0-RC1"
 val munitCatsEffectVersion = "1.0.7"
 val slf4jVersion = "1.7.25"
