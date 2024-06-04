@@ -7,6 +7,7 @@ ThisBuild / developers := List(
   // your GitHub handle and name
   tlGitHubDev("rossabaker", "Ross A. Baker")
 )
+ThisBuild / startYear := Some(2014)
 
 // publish website from this branch
 ThisBuild / tlSitePublishBranch := Some("main")
@@ -38,7 +39,6 @@ lazy val jettyServer = project
   .settings(
     name := "http4s-jetty-server",
     description := "Jetty implementation for http4s servers",
-    startYear := Some(2014),
     libraryDependencies ++= Seq(
       "org.eclipse.jetty" % "jetty-client" % jettyVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
