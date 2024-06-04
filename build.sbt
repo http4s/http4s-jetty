@@ -7,12 +7,13 @@ ThisBuild / developers := List(
   // your GitHub handle and name
   tlGitHubDev("rossabaker", "Ross A. Baker")
 )
+ThisBuild / startYear := Some(2014)
 
 // publish website from this branch
 ThisBuild / tlSitePublishBranch := Some("main")
 
 val Scala213 = "2.13.14"
-ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.19", "3.3.0")
+ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.19", "3.3.3")
 ThisBuild / scalaVersion := Scala213 // the default Scala
 ThisBuild / githubWorkflowJavaVersions ~= {
   // Jetty 10 bumps the requirement to Java 11
@@ -38,7 +39,6 @@ lazy val jettyServer = project
   .settings(
     name := "http4s-jetty-server",
     description := "Jetty implementation for http4s servers",
-    startYear := Some(2014),
     libraryDependencies ++= Seq(
       "org.eclipse.jetty" % "jetty-client" % jettyVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
@@ -49,7 +49,6 @@ lazy val jettyServer = project
       "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
     ),
     jettyApiMappings,
-    javaApiMappings,
   )
 
 lazy val examples = project
@@ -81,7 +80,9 @@ lazy val jettyClient = project
     ),
   )
 
-lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)
+lazy val docs = project
+  .in(file("site"))
+  .enablePlugins(Http4sOrgSitePlugin)
 
 val jettyApiMappings: Setting[_] =
   doc / apiMappings ++= (Compile / fullClasspath).value
@@ -95,28 +96,3 @@ val jettyApiMappings: Setting[_] =
         entry.data -> url(s"https://www.eclipse.org/jetty/javadoc/jetty-${major}/")
     }
     .toMap
-
-// This works out of the box in Scala 2.13, but 2.12 needs some help.
-val javaApiMappings: Setting[_] = {
-  val javaVersion = sys.props("java.specification.version") match {
-    case VersionNumber(Seq(1, v, _*), _, _) => v
-    case VersionNumber(Seq(v, _*), _, _) => v
-    case _ => 8 // not worth crashing over
-  }
-  val baseUrl = javaVersion match {
-    case v if v < 11 => url(s"https://docs.oracle.com/javase/${javaVersion}/docs/api/")
-    case _ => url(s"https://docs.oracle.com/en/java/javase/${javaVersion}/docs/api/java.base/")
-  }
-  doc / apiMappings ++= {
-    val runtimeMXBean = java.lang.management.ManagementFactory.getRuntimeMXBean
-    val bootClassPath =
-      if (runtimeMXBean.isBootClassPathSupported)
-        runtimeMXBean.getBootClassPath
-          .split(java.io.File.pathSeparatorChar)
-          .map(file(_) -> baseUrl)
-          .toMap
-      else
-        Map.empty
-    bootClassPath ++ Map(file("/modules/java.base") -> baseUrl)
-  }
-}
