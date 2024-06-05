@@ -32,7 +32,7 @@ lazy val root = project
 val jettyVersion = "10.0.21"
 val http4sVersion = "0.23.27"
 val http4sServletVersion = "0.24.0-RC1"
-val munitCatsEffectVersion = "1.0.7"
+val munitCatsEffectVersion = "2.0.0"
 val slf4jVersion = "1.7.25"
 
 lazy val jettyServer = project
@@ -47,7 +47,7 @@ lazy val jettyServer = project
       "org.eclipse.jetty.http2" % "http2-server" % jettyVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
       "org.http4s" %% "http4s-servlet" % http4sServletVersion,
-      "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
+      "org.typelevel" %% "munit-cats-effect" % munitCatsEffectVersion % Test,
     ),
     jettyApiMappings,
   )
