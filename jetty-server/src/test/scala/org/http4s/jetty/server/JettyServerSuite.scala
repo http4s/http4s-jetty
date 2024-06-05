@@ -22,6 +22,7 @@ import cats.effect.IO
 import cats.effect.Resource
 import cats.effect.Temporal
 import munit.CatsEffectSuite
+import munit.catseffect.IOFixture
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Request
 import org.eclipse.jetty.client.util.StringRequestContent
@@ -40,7 +41,7 @@ class JettyServerSuite extends CatsEffectSuite {
       Resource.make(IO(new HttpClient()))(c => IO(c.stop())).evalTap(c => IO(c.start())),
     )
 
-  override def munitFixtures: List[Fixture[HttpClient]] = List(client)
+  override def munitFixtures: List[IOFixture[HttpClient]] = List(client)
 
   private val serverR =
     builder
@@ -68,7 +69,7 @@ class JettyServerSuite extends CatsEffectSuite {
       )
       .resource
 
-  private val jettyServer = ResourceFixture[Server](serverR)
+  private val jettyServer = ResourceFunFixture[Server](serverR)
 
   private def fetchBody(req: Request): IO[String] =
     IO.interruptible(req.send().getContentAsString())
