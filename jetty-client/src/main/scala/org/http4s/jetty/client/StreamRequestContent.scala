@@ -22,7 +22,7 @@ import cats.effect._
 import cats.effect.std._
 import cats.syntax.all._
 import fs2._
-import org.eclipse.jetty.client.util.AsyncRequestContent
+import org.eclipse.jetty.client.AsyncRequestContent
 import org.eclipse.jetty.util.{Callback => JettyCallback}
 import org.http4s.jetty.client.internal.loggingAsyncCallback
 import org.log4s.getLogger
@@ -45,13 +45,11 @@ private[jetty] class StreamRequestContent[F[_]] private (
   private val pipe: Pipe[F, Chunk[Byte], Unit] =
     _.evalMap { c =>
       write(c)
-        .ensure(new Exception("something terrible has happened"))(res => res)
-        .map(_ => ())
     }
 
-  private def write(chunk: Chunk[Byte]): F[Boolean] =
+  private def write(chunk: Chunk[Byte]): F[Unit] =
     s.acquire
-      .map(_ => super.offer(chunk.toByteBuffer, callback))
+      .map(_ => super.write(chunk.toByteBuffer, callback))
 
   private val callback: JettyCallback = new JettyCallback {
     override def succeeded(): Unit =

@@ -23,7 +23,7 @@ import cats.effect.std.Dispatcher
 import cats.syntax.all._
 import fs2._
 import org.eclipse.jetty.client.HttpClient
-import org.eclipse.jetty.client.api.{Request => JettyRequest}
+import org.eclipse.jetty.client.{Request => JettyRequest}
 import org.eclipse.jetty.http.{HttpVersion => JHttpVersion}
 import org.http4s.client.Client
 import org.log4s.Logger
