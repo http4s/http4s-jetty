@@ -29,7 +29,7 @@ lazy val root = project
   .enablePlugins(NoPublishPlugin)
   .aggregate(jettyServer, jettyServerEe8, jettyClient)
 
-val jettyVersion = "12.0.15"
+val jettyVersion = "12.0.20"
 val http4sVersion = "0.23.30"
 val http4sServletVersion = "0.24.0-RC2"
 val munitCatsEffectVersion = "2.1.0"
@@ -64,7 +64,6 @@ lazy val jettyServerEe8 = project
     jettyApiMappings,
   )
   .dependsOn(jettyServer % "compile;test->test")
-
 
 lazy val examples = project
   .in(file("examples"))
