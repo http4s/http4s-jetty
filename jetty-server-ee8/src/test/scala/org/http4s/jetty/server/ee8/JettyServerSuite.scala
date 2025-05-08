@@ -17,6 +17,7 @@
 package org.http4s
 package jetty
 package server
+package ee8
 
 import cats.effect.IO
 import cats.effect.Resource
