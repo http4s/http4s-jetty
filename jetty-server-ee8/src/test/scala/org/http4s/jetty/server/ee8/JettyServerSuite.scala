@@ -17,6 +17,7 @@
 package org.http4s
 package jetty
 package server
+package ee8
 
 import cats.effect.IO
 import cats.effect.Resource
@@ -24,8 +25,8 @@ import cats.effect.Temporal
 import munit.CatsEffectSuite
 import munit.catseffect.IOFixture
 import org.eclipse.jetty.client.HttpClient
-import org.eclipse.jetty.client.api.Request
-import org.eclipse.jetty.client.util.StringRequestContent
+import org.eclipse.jetty.client.Request
+import org.eclipse.jetty.client.StringRequestContent
 import org.http4s.dsl.io._
 import org.http4s.server.Server
 

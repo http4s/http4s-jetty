@@ -17,26 +17,24 @@
 package org.http4s
 package jetty
 package server
+package ee8
 
 import cats.effect._
 import cats.effect.kernel.Async
 import cats.effect.std.Dispatcher
 import cats.syntax.all._
-import jakarta.servlet.DispatcherType
-import jakarta.servlet.http.HttpFilter
-import jakarta.servlet.http.HttpServlet
+import org.eclipse.jetty.ee8.servlet.FilterHolder
+import org.eclipse.jetty.ee8.servlet.ServletContextHandler
+import org.eclipse.jetty.ee8.servlet.ServletHolder
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.{Server => JServer}
-import org.eclipse.jetty.servlet.FilterHolder
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
-import org.http4s.jetty.server.JettyBuilder._
+import org.http4s.jetty.server.ee8.JettyBuilder._
 import org.http4s.server.DefaultServiceErrorHandler
 import org.http4s.server.SSLClientAuthMode
 import org.http4s.server.SSLKeyStoreSupport.StoreInfo
@@ -54,6 +52,9 @@ import java.net.InetSocketAddress
 import java.util
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLParameters
+import javax.servlet.DispatcherType
+import javax.servlet.http.HttpFilter
+import javax.servlet.http.HttpServlet
 import scala.annotation.nowarn
 import scala.collection.immutable
 import scala.concurrent.duration._

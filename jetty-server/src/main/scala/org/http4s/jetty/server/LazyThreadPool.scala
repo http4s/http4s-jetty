@@ -24,7 +24,7 @@ import org.eclipse.jetty.util.thread.ThreadPool
   * started until one of the methods on it is invoked.
   *
   * @note This is only provided to as a safety mechanism for the legacy
-  *       methods in [[JettyBuilder]] which operated directly on a
+  *       methods in `JettyBuilder` which operated directly on a
   *       [[org.eclipse.jetty.util.thread.ThreadPool]]. If you are not using
   *       the default [[org.eclipse.jetty.util.thread.ThreadPool]] you should
   *       be using [[JettyThreadPools]] to build a [[cats.effect.Resource]]

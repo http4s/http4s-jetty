@@ -1,6 +1,6 @@
 import org.typelevel.sbt.gha
 
-ThisBuild / tlBaseVersion := "0.25" // your current series x.y
+ThisBuild / tlBaseVersion := "0.26" // your current series x.y
 
 ThisBuild / licenses := Seq(License.Apache2)
 ThisBuild / developers := List(
@@ -17,8 +17,8 @@ ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.20", "3.3.5")
 ThisBuild / scalaVersion := Scala213 // the default Scala
 ThisBuild / tlJdkRelease := Some(11)
 ThisBuild / githubWorkflowJavaVersions ~= {
-  // Jetty 10 bumps the requirement to Java 11
-  _.filter { case JavaSpec(_, major) => major.toInt >= 11 }
+  // Jetty 12 bumps the requirement to Java 17
+  _.filter { case JavaSpec(_, major) => major.toInt >= 17 }
 }
 
 ThisBuild / resolvers +=
@@ -27,13 +27,15 @@ ThisBuild / resolvers +=
 lazy val root = project
   .in(file("."))
   .enablePlugins(NoPublishPlugin)
-  .aggregate(jettyServer, jettyClient)
+  .aggregate(jettyServer, jettyServerEe8, jettyClient)
 
-val jettyVersion = "11.0.25"
+val catsEffectVersion = "3.6.1"
+val jettyVersion = "12.0.20"
 val http4sVersion = "0.23.30"
-val http4sServletVersion = "0.25.0-RC1"
+val http4sServletVersion = "0.24.0-RC2"
 val munitCatsEffectVersion = "2.1.0"
 val slf4jVersion = "1.7.25"
+val scalaJava8Compat = "1.0.2"
 
 lazy val jettyServer = project
   .in(file("jetty-server"))
@@ -42,15 +44,28 @@ lazy val jettyServer = project
     description := "Jetty implementation for http4s servers",
     libraryDependencies ++= Seq(
       "org.eclipse.jetty" % "jetty-client" % jettyVersion % Test,
-      "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
-      "org.eclipse.jetty.http2" % "http2-server" % jettyVersion,
+      "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
-      "org.http4s" %% "http4s-servlet" % http4sServletVersion,
       "org.typelevel" %% "munit-cats-effect" % munitCatsEffectVersion % Test,
     ),
     jettyApiMappings,
   )
+
+lazy val jettyServerEe8 = project
+  .in(file("jetty-server-ee8"))
+  .settings(
+    name := "http4s-jetty-server-ee8",
+    description := "Jetty implementation for http4s servers",
+    libraryDependencies ++= Seq(
+      "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion,
+      "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion,
+      "org.http4s" %% "http4s-server" % http4sVersion,
+      "org.http4s" %% "http4s-servlet" % http4sServletVersion,
+    ),
+    jettyApiMappings,
+  )
+  .dependsOn(jettyServer % "compile;test->test")
 
 lazy val examples = project
   .in(file("examples"))
@@ -77,6 +92,7 @@ lazy val jettyClient = project
       "org.eclipse.jetty" % "jetty-client" % jettyVersion,
       "org.eclipse.jetty" % "jetty-http" % jettyVersion,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
+      "org.scala-lang.modules" %% "scala-java8-compat" % scalaJava8Compat,
       "org.http4s" %% "http4s-client-testkit" % http4sVersion % Test,
     ),
   )
