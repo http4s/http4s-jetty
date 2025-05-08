@@ -15,8 +15,9 @@
  */
 
 package org.http4s
-package jetty
+package jetty12
 package server
+package ee8
 
 import cats.effect._
 import cats.syntax.all._
@@ -31,7 +32,7 @@ import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.{Server => JServer}
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
-import org.http4s.jetty.server.JettyBuilder._
+import org.http4s.jetty12.server.ee8.JettyBuilder._
 import org.http4s.server.DefaultServiceErrorHandler
 import org.http4s.server.SSLClientAuthMode
 import org.http4s.server.SSLKeyStoreSupport.StoreInfo

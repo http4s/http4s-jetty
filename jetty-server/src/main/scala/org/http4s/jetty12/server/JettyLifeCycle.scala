@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.http4s.jetty.server
+package org.http4s.jetty12.server
 
 import cats.effect._
 import cats.syntax.all._
 import org.eclipse.jetty.util.component.Destroyable
 import org.eclipse.jetty.util.component.LifeCycle
 
-private[jetty] object JettyLifeCycle {
+private[jetty12] object JettyLifeCycle {
 
   /** Wrap a Jetty [[org.eclipse.jetty.util.component.LifeCycle]] value in a
     * [[cats.effect.Resource]]. This calls

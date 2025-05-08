@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.http4s.jetty.server
+package org.http4s.jetty12.server
 
 import cats._
 import org.eclipse.jetty.util.thread.QueuedThreadPool
@@ -30,7 +30,7 @@ import org.eclipse.jetty.util.thread.ThreadPool
   *       be using [[JettyThreadPools]] to build a [[cats.effect.Resource]]
   *       for the pool.
   */
-private[jetty] object LazyThreadPool {
+private[jetty12] object LazyThreadPool {
 
   def newLazyThreadPool: ThreadPool =
     new ThreadPool {

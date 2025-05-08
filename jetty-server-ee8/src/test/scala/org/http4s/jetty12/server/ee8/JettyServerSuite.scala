@@ -15,8 +15,9 @@
  */
 
 package org.http4s
-package jetty
+package jetty12
 package server
+package ee8
 
 import cats.effect.ContextShift
 import cats.effect.IO

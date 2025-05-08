@@ -15,7 +15,7 @@
  */
 
 package org.http4s
-package jetty
+package jetty12
 package client
 
 import cats.effect._
@@ -31,12 +31,12 @@ import org.eclipse.jetty.http.{HttpVersion => JHttpVersion}
 import org.http4s.internal.CollectionCompat.CollectionConverters._
 import org.http4s.internal.invokeCallback
 import org.http4s.internal.loggingAsyncCallback
-import org.http4s.jetty.client.ResponseListener.Item
+import org.http4s.jetty12.client.ResponseListener.Item
 import org.log4s.getLogger
 
 import java.nio.ByteBuffer
 
-private[jetty] final case class ResponseListener[F[_]](
+private[jetty12] final case class ResponseListener[F[_]](
     queue: Queue[F, Item],
     cb: Callback[Resource[F, Response[F]]],
 )(implicit F: ConcurrentEffect[F], CS: ContextShift[F])
@@ -131,7 +131,7 @@ private[jetty] final case class ResponseListener[F[_]](
     queue.enqueue1(item).runAsync(cb).unsafeRunSync()
 }
 
-private[jetty] object ResponseListener {
+private[jetty12] object ResponseListener {
   sealed trait Item
   object Item {
     case object Done extends Item

@@ -15,7 +15,7 @@
  */
 
 package org.http4s
-package jetty
+package jetty12
 package client
 
 import cats.effect.IO

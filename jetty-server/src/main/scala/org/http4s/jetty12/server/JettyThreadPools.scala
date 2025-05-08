@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.http4s.jetty.server
+package org.http4s.jetty12.server
 
 import cats.effect._
 import org.eclipse.jetty.util.component.LifeCycle

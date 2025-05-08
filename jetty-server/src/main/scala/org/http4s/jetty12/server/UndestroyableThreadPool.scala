@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.http4s.jetty.server
+package org.http4s.jetty12.server
 
 import org.eclipse.jetty.util.thread.ThreadPool
 
@@ -30,7 +30,7 @@ import org.eclipse.jetty.util.thread.ThreadPool
   * the resource leak by invoking `.destroy` on the Jetty Server when the
   * resource is completed.
   */
-private[jetty] final class UndestroyableThreadPool(value: ThreadPool) extends ThreadPool {
+private[jetty12] final class UndestroyableThreadPool(value: ThreadPool) extends ThreadPool {
   override final def getIdleThreads: Int = value.getIdleThreads
 
   override final def getThreads: Int = value.getThreads

@@ -21,7 +21,7 @@ ThisBuild / githubWorkflowJavaVersions ~= {
 lazy val root = project
   .in(file("."))
   .enablePlugins(NoPublishPlugin)
-  .aggregate(jettyServer, jettyClient, testing, client)
+  .aggregate(jettyServer, jettyServerEe8, jettyClient, testing, client)
 
 val http4sVersion = "0.22.15"
 val jettyVersion = "12.0.5"
@@ -38,7 +38,6 @@ lazy val jettyServer = project
     libraryDependencies ++= Seq(
       "org.eclipse.jetty" % "jetty-client" % jettyVersion % Test,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
-      "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion,
       "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion,
       "org.http4s" %% "http4s-servlet" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
@@ -49,6 +48,18 @@ lazy val jettyServer = project
   )
   .dependsOn(testing % "test->test")
 
+lazy val jettyServerEe8 = project
+  .in(file("jetty-server-ee8"))
+  .settings(
+    name := "http4s-jetty12-server-ee8",
+    description := "Jetty implementation for http4s servers on Java EE 8",
+    libraryDependencies ++= Seq(
+      "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion,
+      "org.typelevel" %% "munit-cats-effect-2" % munitCatsEffectVersion % Test,
+    ),
+    jettyApiMappings,
+  )
+  .dependsOn(jettyServer % "compile;test->test")
 
 lazy val jettyClient = project
   .in(file("jetty-client"))

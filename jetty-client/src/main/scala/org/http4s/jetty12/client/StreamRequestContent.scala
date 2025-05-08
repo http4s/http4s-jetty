@@ -15,7 +15,7 @@
  */
 
 package org.http4s
-package jetty
+package jetty12
 package client
 
 import cats.effect._
@@ -28,7 +28,7 @@ import org.eclipse.jetty.util.{Callback => JettyCallback}
 import org.http4s.internal.loggingAsyncCallback
 import org.log4s.getLogger
 
-private[jetty] final case class StreamRequestContent[F[_]](s: Semaphore[F])(implicit
+private[jetty12] final case class StreamRequestContent[F[_]](s: Semaphore[F])(implicit
     F: Effect[F]
 ) extends AsyncRequestContent {
   import StreamRequestContent.logger
@@ -55,7 +55,7 @@ private[jetty] final case class StreamRequestContent[F[_]](s: Semaphore[F])(impl
   }
 }
 
-private[jetty] object StreamRequestContent {
+private[jetty12] object StreamRequestContent {
   private val logger = getLogger
 
   def apply[F[_]]()(implicit F: ConcurrentEffect[F]): F[StreamRequestContent[F]] =
