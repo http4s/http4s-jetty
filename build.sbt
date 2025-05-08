@@ -7,13 +7,15 @@ ThisBuild / developers := List(
   // your GitHub handle and name
   tlGitHubDev("rossabaker", "Ross A. Baker")
 )
+ThisBuild / startYear := Some(2014)
 
 // publish website from this branch
 ThisBuild / tlSitePublishBranch := Some("main")
 
-val Scala213 = "2.13.8"
-ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.17", "3.2.0")
+val Scala213 = "2.13.16"
+ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.20", "3.3.5")
 ThisBuild / scalaVersion := Scala213 // the default Scala
+ThisBuild / tlJdkRelease := Some(11)
 ThisBuild / githubWorkflowJavaVersions ~= {
   // Jetty 10 bumps the requirement to Java 11
   _.filter { case JavaSpec(_, major) => major.toInt >= 11 }
@@ -28,9 +30,9 @@ lazy val root = project
   .aggregate(jettyServer, jettyClient)
 
 val jettyVersion = "11.0.13"
-val http4sVersion = "0.23.17"
-val http4sServletVersion = "0.25.0-M2"
-val munitCatsEffectVersion = "1.0.7"
+val http4sVersion = "0.23.30"
+val http4sServletVersion = "0.25.0-RC1"
+val munitCatsEffectVersion = "2.1.0"
 val slf4jVersion = "1.7.25"
 
 lazy val jettyServer = project
@@ -38,7 +40,6 @@ lazy val jettyServer = project
   .settings(
     name := "http4s-jetty-server",
     description := "Jetty implementation for http4s servers",
-    startYear := Some(2014),
     libraryDependencies ++= Seq(
       "org.eclipse.jetty" % "jetty-client" % jettyVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
@@ -46,10 +47,9 @@ lazy val jettyServer = project
       "org.eclipse.jetty.http2" % "http2-server" % jettyVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
       "org.http4s" %% "http4s-servlet" % http4sServletVersion,
-      "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
+      "org.typelevel" %% "munit-cats-effect" % munitCatsEffectVersion % Test,
     ),
     jettyApiMappings,
-    javaApiMappings,
   )
 
 lazy val examples = project
@@ -77,11 +77,13 @@ lazy val jettyClient = project
       "org.eclipse.jetty" % "jetty-client" % jettyVersion,
       "org.eclipse.jetty" % "jetty-http" % jettyVersion,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
-      "org.http4s" %% "http4s-client-testkit" % "0.23.13" % Test,
+      "org.http4s" %% "http4s-client-testkit" % http4sVersion % Test,
     ),
   )
 
-lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)
+lazy val docs = project
+  .in(file("site"))
+  .enablePlugins(Http4sOrgSitePlugin)
 
 val jettyApiMappings: Setting[_] =
   doc / apiMappings ++= (Compile / fullClasspath).value
@@ -95,28 +97,3 @@ val jettyApiMappings: Setting[_] =
         entry.data -> url(s"https://www.eclipse.org/jetty/javadoc/jetty-${major}/")
     }
     .toMap
-
-// This works out of the box in Scala 2.13, but 2.12 needs some help.
-val javaApiMappings: Setting[_] = {
-  val javaVersion = sys.props("java.specification.version") match {
-    case VersionNumber(Seq(1, v, _*), _, _) => v
-    case VersionNumber(Seq(v, _*), _, _) => v
-    case _ => 8 // not worth crashing over
-  }
-  val baseUrl = javaVersion match {
-    case v if v < 11 => url(s"https://docs.oracle.com/javase/${javaVersion}/docs/api/")
-    case _ => url(s"https://docs.oracle.com/en/java/javase/${javaVersion}/docs/api/java.base/")
-  }
-  doc / apiMappings ++= {
-    val runtimeMXBean = java.lang.management.ManagementFactory.getRuntimeMXBean
-    val bootClassPath =
-      if (runtimeMXBean.isBootClassPathSupported)
-        runtimeMXBean.getBootClassPath
-          .split(java.io.File.pathSeparatorChar)
-          .map(file(_) -> baseUrl)
-          .toMap
-      else
-        Map.empty
-    bootClassPath ++ Map(file("/modules/java.base") -> baseUrl)
-  }
-}
