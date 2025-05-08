@@ -1,6 +1,6 @@
 import org.typelevel.sbt.gha
 
-ThisBuild / tlBaseVersion := "0.24" // your current series x.y
+ThisBuild / tlBaseVersion := "0.26" // your current series x.y
 
 ThisBuild / licenses := Seq(License.Apache2)
 ThisBuild / developers := List(
@@ -31,7 +31,7 @@ lazy val root = project
 
 val jettyVersion = "12.0.15"
 val http4sVersion = "0.23.30"
-val http4sServletVersion = "0.24.0-RC1"
+val http4sServletVersion = "0.24.0-RC2"
 val munitCatsEffectVersion = "2.1.0"
 val slf4jVersion = "1.7.25"
 val scalaJava8Compat = "1.0.2"
