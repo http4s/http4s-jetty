@@ -30,12 +30,12 @@ object JettyThreadPools {
     * Jetty [[org.eclipse.jetty.util.thread.ThreadPool]] have some rather
     * unusual properties. [[org.eclipse.jetty.util.thread.ThreadPool]] itself
     * does not implement any of the standard JVM or Jetty lifecycle systems,
-    * e.g. [[java.lang.Closeable]] or
+    * e.g. `java.lang.Closeable` or
     * [[org.eclipse.jetty.util.component.LifeCycle]], but ''all'' the concrete
     * implementations of it provided by Jetty ''do'' implement
     * [[[[org.eclipse.jetty.util.component.LifeCycle]]]].
     *
-    * The [[cats.effect.Resource]] implemented here will use the
+    * The `cats.effect.Resource` implemented here will use the
     * [[org.eclipse.jetty.util.component.LifeCycle]] shutdown semantics if the
     * underlying [[org.eclipse.jetty.util.thread.ThreadPool]] implements that
     * interface. Otherwise it will invoke
@@ -46,7 +46,7 @@ object JettyThreadPools {
     *       [[org.eclipse.jetty.util.thread.ThreadPool]] provided to this
     *       function ''has not been started''. If it has and it implements
     *       [[org.eclipse.jetty.util.component.LifeCycle]], then the creation
-    *       of the [[cats.effect.Resource]] will fail.
+    *       of the `cats.effect.Resource` will fail.
     */
   def resource[F[_]](value: F[ThreadPool])(implicit F: Async[F]): Resource[F, ThreadPool] =
     Resource.eval(value).flatMap {
@@ -58,7 +58,7 @@ object JettyThreadPools {
     }
 
   /** The default [[org.eclipse.jetty.util.thread.ThreadPool]] used by
-    * [[JettyBuilder]]. If you require specific constraints on this (a certain
+    * `JettyBuilder`. If you require specific constraints on this (a certain
     * number of threads, etc.) please use [[resource]] and take a look at the
     * concrete implementations of [[org.eclipse.jetty.util.thread.ThreadPool]]
     * provided by Jetty.
