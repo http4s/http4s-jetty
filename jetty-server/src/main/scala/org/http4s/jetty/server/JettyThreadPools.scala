@@ -30,7 +30,7 @@ object JettyThreadPools {
     * Jetty [[org.eclipse.jetty.util.thread.ThreadPool]] have some rather
     * unusual properties. [[org.eclipse.jetty.util.thread.ThreadPool]] itself
     * does not implement any of the standard JVM or Jetty lifecycle systems,
-    * e.g. [[java.io.Closeable]] or
+    * e.g. `java.io.Closeable` or
     * [[org.eclipse.jetty.util.component.LifeCycle]], but ''all'' the concrete
     * implementations of it provided by Jetty ''do'' implement
     * [[org.eclipse.jetty.util.component.LifeCycle]].
