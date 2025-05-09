@@ -27,6 +27,7 @@ val http4sVersion = "0.22.15"
 val jettyVersion = "12.0.5"
 val nettyVersion = "4.1.76.Final"
 val munitCatsEffectVersion = "1.0.7"
+val scalacCompatAnnotation = "0.1.4"
 val scalaJava8CompatVersion = "1.0.2"
 val slf4jVersion = "2.0.17"
 
@@ -43,6 +44,7 @@ lazy val jettyServer = project
       "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
       "org.slf4j" % "slf4j-simple" % slf4jVersion % Test,
       "org.typelevel" %% "munit-cats-effect-2" % munitCatsEffectVersion % Test,
+      "org.typelevel" %% "scalac-compat-annotation" % scalacCompatAnnotation % Test,
     ),
     jettyApiMappings,
   )

@@ -35,8 +35,7 @@ import org.http4s.Method
 import org.http4s.Response
 import org.http4s.client.scaffold.JavaConverters._
 import org.http4s.headers.`Transfer-Encoding`
-
-import scala.annotation.nowarn
+import org.typelevel.scalaccompat.annotation.nowarn212
 
 object RoutesToNettyAdapter {
   def apply[F[_]](routes: HttpRoutes[F])(implicit
@@ -69,7 +68,7 @@ class RoutesToHandlerAdapter[F[_]](
         headers = http4s.Headers(request.headers().names().asScala.toVector.flatMap { k =>
           val vs = request.headers().getAll(k)
           vs.asScala.toVector.map(v => (k -> v): http4s.Header.ToRaw)
-        }): @nowarn("cat=deprecation")
+        }): @nowarn212("cat=deprecation")
         bodyQueue <- Queue.unbounded[F, Option[Chunk[Byte]]]
         _ <- requestBodyQueue.set(bodyQueue)
         body = bodyQueue.dequeue.unNoneTerminate.flatMap(Stream.chunk)
