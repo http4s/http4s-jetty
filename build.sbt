@@ -25,8 +25,8 @@ lazy val root = project
 
 val catsEffectVersion = "2.5.5"
 val http4sVersion = "0.22.15"
-val jettyVersion = "12.0.5"
-val nettyVersion = "4.1.76.Final"
+val jettyVersion = "12.0.20"
+val nettyVersion = "4.1.115.Final"
 val munitCatsEffectVersion = "1.0.7"
 val scalacCompatAnnotation = "0.1.4"
 val scalaJava8CompatVersion = "1.0.2"
