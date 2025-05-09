@@ -24,7 +24,7 @@ lazy val root = project
   .aggregate(jettyServer, jettyServerEe8, jettyClient, testing, client)
 
 val http4sVersion = "0.22.15"
-val jettyVersion = "12.0.5"
+val jettyVersion = "12.0.20"
 val nettyVersion = "4.1.76.Final"
 val munitCatsEffectVersion = "1.0.7"
 val scalaJava8CompatVersion = "1.0.2"
