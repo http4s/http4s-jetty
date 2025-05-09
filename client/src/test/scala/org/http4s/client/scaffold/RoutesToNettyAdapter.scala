@@ -60,6 +60,7 @@ class RoutesToHandlerAdapter[F[_]](
 )(implicit F: ConcurrentEffect[F])
     extends Handler {
 
+  @nowarn212("cat=deprecation")
   override def onRequestStart(ctx: ChannelHandlerContext, request: HttpRequest): Unit =
     (
       for {
@@ -68,7 +69,7 @@ class RoutesToHandlerAdapter[F[_]](
         headers = http4s.Headers(request.headers().names().asScala.toVector.flatMap { k =>
           val vs = request.headers().getAll(k)
           vs.asScala.toVector.map(v => (k -> v): http4s.Header.ToRaw)
-        }): @nowarn212("cat=deprecation")
+        })
         bodyQueue <- Queue.unbounded[F, Option[Chunk[Byte]]]
         _ <- requestBodyQueue.set(bodyQueue)
         body = bodyQueue.dequeue.unNoneTerminate.flatMap(Stream.chunk)
