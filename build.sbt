@@ -23,6 +23,7 @@ lazy val root = project
   .enablePlugins(NoPublishPlugin)
   .aggregate(jettyServer, jettyServerEe8, jettyClient, testing, client)
 
+val catsEffectVersion = "2.5.5"
 val http4sVersion = "0.22.15"
 val jettyVersion = "12.0.5"
 val nettyVersion = "4.1.76.Final"
@@ -39,10 +40,9 @@ lazy val jettyServer = project
     libraryDependencies ++= Seq(
       "org.eclipse.jetty" % "jetty-client" % jettyVersion % Test,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
-      "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion,
-      "org.http4s" %% "http4s-servlet" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
       "org.slf4j" % "slf4j-simple" % slf4jVersion % Test,
+      "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "munit-cats-effect-2" % munitCatsEffectVersion % Test,
       "org.typelevel" %% "scalac-compat-annotation" % scalacCompatAnnotation % Test,
     ),
@@ -57,6 +57,8 @@ lazy val jettyServerEe8 = project
     description := "Jetty implementation for http4s servers on Java EE 8",
     libraryDependencies ++= Seq(
       "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion,
+      "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion,
+      "org.http4s" %% "http4s-servlet" % http4sVersion,
       "org.typelevel" %% "munit-cats-effect-2" % munitCatsEffectVersion % Test,
     ),
     jettyApiMappings,
