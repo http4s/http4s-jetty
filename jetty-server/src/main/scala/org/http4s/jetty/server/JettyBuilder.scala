@@ -38,8 +38,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import org.http4s.jetty.server.JettyBuilder._
 import org.http4s.server.DefaultServiceErrorHandler
-import org.http4s.server.SSLClientAuthMode
-import org.http4s.server.SSLKeyStoreSupport.StoreInfo
 import org.http4s.server.Server
 import org.http4s.server.ServerBuilder
 import org.http4s.server.ServiceErrorHandler
@@ -109,31 +107,6 @@ sealed class JettyBuilder[F[_]] private (
       banner,
       jettyHttpConfiguration,
     )
-
-  @deprecated(
-    "Build an `SSLContext` from the first four parameters and use `withSslContext` (note lowercase). To also request client certificates, use `withSslContextAndParameters, calling either `.setWantClientAuth(true)` or `setNeedClientAuth(true)` on the `SSLParameters`.",
-    "0.21.0-RC3",
-  )
-  def withSSL(
-      keyStore: StoreInfo,
-      keyManagerPassword: String,
-      protocol: String = "TLS",
-      trustStore: Option[StoreInfo] = None,
-      clientAuth: SSLClientAuthMode = SSLClientAuthMode.NotRequested,
-  ): Self =
-    copy(sslConfig =
-      new KeyStoreBits(keyStore, keyManagerPassword, protocol, trustStore, clientAuth)
-    )
-
-  @deprecated(
-    "Use `withSslContext` (note lowercase). To request client certificates, use `withSslContextAndParameters, calling either `.setWantClientAuth(true)` or `setNeedClientAuth(true)` on the `SSLParameters`.",
-    "0.21.0-RC3",
-  )
-  def withSSLContext(
-      sslContext: SSLContext,
-      clientAuth: SSLClientAuthMode = SSLClientAuthMode.NotRequested,
-  ): Self =
-    copy(sslConfig = new ContextWithClientAuth(sslContext, clientAuth))
 
   /** Configures the server with TLS, using the provided `SSLContext` and its
     * default `SSLParameters`
@@ -367,41 +340,6 @@ object JettyBuilder {
     def isSecure: Boolean
   }
 
-  private class KeyStoreBits(
-      keyStore: StoreInfo,
-      keyManagerPassword: String,
-      protocol: String,
-      trustStore: Option[StoreInfo],
-      clientAuth: SSLClientAuthMode,
-  ) extends SslConfig {
-    def makeSslContextFactory: Option[SslContextFactory.Server] = {
-      val sslContextFactory = new SslContextFactory.Server()
-      sslContextFactory.setKeyStorePath(keyStore.path)
-      sslContextFactory.setKeyStorePassword(keyStore.password)
-      sslContextFactory.setKeyManagerPassword(keyManagerPassword)
-      sslContextFactory.setProtocol(protocol)
-      updateClientAuth(sslContextFactory, clientAuth)
-
-      trustStore.foreach { trustManagerBits =>
-        sslContextFactory.setTrustStorePath(trustManagerBits.path)
-        sslContextFactory.setTrustStorePassword(trustManagerBits.password)
-      }
-      sslContextFactory.some
-    }
-    def isSecure = true
-  }
-
-  private class ContextWithClientAuth(sslContext: SSLContext, clientAuth: SSLClientAuthMode)
-      extends SslConfig {
-    def makeSslContextFactory: Option[SslContextFactory.Server] = {
-      val sslContextFactory = new SslContextFactory.Server()
-      sslContextFactory.setSslContext(sslContext)
-      updateClientAuth(sslContextFactory, clientAuth)
-      sslContextFactory.some
-    }
-    def isSecure = true
-  }
-
   private class ContextOnly(sslContext: SSLContext) extends SslConfig {
     def makeSslContextFactory: Option[SslContextFactory.Server] = {
       val sslContextFactory = new SslContextFactory.Server()
@@ -426,22 +364,6 @@ object JettyBuilder {
     def makeSslContextFactory: Option[SslContextFactory.Server] = None
     def isSecure = false
   }
-
-  private def updateClientAuth(
-      sslContextFactory: SslContextFactory.Server,
-      clientAuthMode: SSLClientAuthMode,
-  ): Unit =
-    clientAuthMode match {
-      case SSLClientAuthMode.NotRequested =>
-        sslContextFactory.setWantClientAuth(false)
-        sslContextFactory.setNeedClientAuth(false)
-
-      case SSLClientAuthMode.Requested =>
-        sslContextFactory.setWantClientAuth(true)
-
-      case SSLClientAuthMode.Required =>
-        sslContextFactory.setNeedClientAuth(true)
-    }
 
   /** The default [[org.eclipse.jetty.server.HttpConfiguration]] to use with jetty. */
   private val defaultJettyHttpConfiguration: HttpConfiguration = {
