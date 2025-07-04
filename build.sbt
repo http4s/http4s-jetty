@@ -21,10 +21,19 @@ ThisBuild / githubWorkflowJavaVersions ~= {
 lazy val root = project
   .in(file("."))
   .enablePlugins(NoPublishPlugin)
-  .aggregate(jettyServer, jettyServerEe8, jettyClient, testing, client)
+  .aggregate(
+    jettyServer,
+    jettyServerEe8,
+    jettyServerEe9,
+    jettyServerEe10,
+    jettyClient,
+    testing,
+    client,
+  )
 
 val catsEffectVersion = "2.5.5"
 val http4sVersion = "0.22.15"
+val http4sServletVersion = "0.22.0-M1"
 val jettyVersion = "12.0.20"
 val nettyVersion = "4.1.115.Final"
 val munitCatsEffectVersion = "1.0.7"
@@ -58,7 +67,37 @@ lazy val jettyServerEe8 = project
     libraryDependencies ++= Seq(
       "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion,
       "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion,
-      "org.http4s" %% "http4s-servlet" % http4sVersion,
+      "org.http4s" %% "http4s-servlet4" % http4sServletVersion,
+      "org.typelevel" %% "munit-cats-effect-2" % munitCatsEffectVersion % Test,
+    ),
+    jettyApiMappings,
+  )
+  .dependsOn(jettyServer % "compile;test->test")
+
+lazy val jettyServerEe9 = project
+  .in(file("jetty-server-ee9"))
+  .settings(
+    name := "http4s-jetty12-server-ee9",
+    description := "Jetty implementation for http4s servers on Java EE 8",
+    libraryDependencies ++= Seq(
+      "org.eclipse.jetty.ee9" % "jetty-ee9-servlet" % jettyVersion,
+      "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion,
+      "org.http4s" %% "http4s-servlet5" % http4sServletVersion,
+      "org.typelevel" %% "munit-cats-effect-2" % munitCatsEffectVersion % Test,
+    ),
+    jettyApiMappings,
+  )
+  .dependsOn(jettyServer % "compile;test->test")
+
+lazy val jettyServerEe10 = project
+  .in(file("jetty-server-ee10"))
+  .settings(
+    name := "http4s-jetty12-server-ee10",
+    description := "Jetty implementation for http4s servers on Java EE 10",
+    libraryDependencies ++= Seq(
+      "org.eclipse.jetty.ee10" % "jetty-ee10-servlet" % jettyVersion,
+      "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion,
+      "org.http4s" %% "http4s-servlet6" % http4sServletVersion,
       "org.typelevel" %% "munit-cats-effect-2" % munitCatsEffectVersion % Test,
     ),
     jettyApiMappings,
