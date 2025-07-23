@@ -43,9 +43,7 @@ private[jetty] class StreamRequestContent[F[_]] private (
       .onError { case t => F.delay(logger.error(t)("Unable to write to Jetty sink")) }
 
   private val pipe: Pipe[F, Chunk[Byte], Unit] =
-    _.evalMap { c =>
-      write(c)
-    }
+    _.evalMap(chunk => write(chunk))
 
   private def write(chunk: Chunk[Byte]): F[Unit] =
     s.acquire
