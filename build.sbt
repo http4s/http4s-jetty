@@ -15,10 +15,10 @@ ThisBuild / tlSitePublishBranch := Some("main")
 val Scala213 = "2.13.16"
 ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.20", "3.3.6")
 ThisBuild / scalaVersion := Scala213 // the default Scala
-ThisBuild / tlJdkRelease := Some(11)
+ThisBuild / tlJdkRelease := Some(17)
 ThisBuild / githubWorkflowJavaVersions ~= {
-  // Jetty 10 bumps the requirement to Java 11
-  _.filter { case JavaSpec(_, major) => major.toInt >= 11 }
+  // The minimum required Java version for Jetty 12 is 17.
+  _.filter { case JavaSpec(_, major) => major.toInt >= 17 }
 }
 
 ThisBuild / resolvers +=
@@ -29,7 +29,7 @@ lazy val root = project
   .enablePlugins(NoPublishPlugin)
   .aggregate(jettyServer, jettyClient)
 
-val jettyVersion = "10.0.25"
+val jettyVersion = "12.0.23"
 val http4sVersion = "0.23.30"
 val http4sServletVersion = "0.24.0-RC3"
 val munitCatsEffectVersion = "2.1.0"
@@ -42,9 +42,9 @@ lazy val jettyServer = project
     description := "Jetty implementation for http4s servers",
     libraryDependencies ++= Seq(
       "org.eclipse.jetty" % "jetty-client" % jettyVersion % Test,
-      "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
+      "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
-      "org.eclipse.jetty.http2" % "http2-server" % jettyVersion,
+      "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
       "org.http4s" %% "http4s-servlet" % http4sServletVersion,
       "org.typelevel" %% "munit-cats-effect" % munitCatsEffectVersion % Test,
