@@ -28,6 +28,7 @@ import org.eclipse.jetty.client.Result
 import org.eclipse.jetty.client.{Response => JettyResponse}
 import org.eclipse.jetty.http.HttpFields
 import org.eclipse.jetty.http.{HttpVersion => JHttpVersion}
+import org.eclipse.jetty.io.Content
 import org.http4s.internal.CollectionCompat.CollectionConverters._
 import org.http4s.internal.invokeCallback
 import org.http4s.internal.loggingAsyncCallback
@@ -85,12 +86,14 @@ private[jetty12] final case class ResponseListener[F[_]](
 
   override def onContent(
       response: JettyResponse,
-      content: ByteBuffer,
+      chunk: Content.Chunk,
+      demander: Runnable,
   ): Unit = {
+    val content = chunk.getByteBuffer
     val copy = ByteBuffer.allocate(content.remaining())
     copy.put(content).flip()
     enqueue(Item.Buf(copy)) {
-      case Right(_) => IO.unit
+      case Right(_) => IO(demander.run())
       case Left(e) =>
         IO(logger.error(e)("Error in asynchronous callback"))
     }
