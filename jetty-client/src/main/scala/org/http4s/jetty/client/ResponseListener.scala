@@ -28,6 +28,7 @@ import org.eclipse.jetty.client.Result
 import org.eclipse.jetty.client.{Response => JettyResponse}
 import org.eclipse.jetty.http.HttpFields
 import org.eclipse.jetty.http.{HttpVersion => JHttpVersion}
+import org.eclipse.jetty.io.Content
 import org.http4s.internal.CollectionCompat.CollectionConverters._
 import org.http4s.jetty.client.ResponseListener.Item
 import org.http4s.jetty.client.internal.loggingAsyncCallback
@@ -87,13 +88,14 @@ private[jetty] final case class ResponseListener[F[_]](
 
   override def onContent(
       response: JettyResponse,
-      content: ByteBuffer,
+      chunk: Content.Chunk,
+      demander: Runnable,
   ): Unit = {
+    val content = chunk.getByteBuffer
     val copy = ByteBuffer.allocate(content.remaining())
     copy.put(content).flip()
-    enqueueSync(Item.Buf(copy)) {
-      case Right(_) =>
-        F.unit
+    enqueue(Item.Buf(copy)) {
+      case Right(_) => F.delay(demander.run())
       case Left(e) =>
         F.delay(logger.error(e)("Error in asynchronous callback"))
     }
@@ -114,12 +116,9 @@ private[jetty] final case class ResponseListener[F[_]](
   // (the request might complete after the response has been entirely received)
   override def onComplete(result: Result): Unit = ()
 
-  private def abort(t: Throwable, response: JettyResponse): Unit = {
-    import scala.compat.java8.FutureConverters._
-
+  private def abort(t: Throwable, response: JettyResponse): Unit =
     dispatcher.unsafeRunAndForget(
-      Async[F]
-        .fromFuture(F.delay(response.abort(t).toScala))
+      F.fromCompletableFuture(F.delay(response.abort(t)))
         .map { aborted =>
           if (!aborted)
             logger.error(t)("Failed to abort the response")
@@ -129,16 +128,12 @@ private[jetty] final case class ResponseListener[F[_]](
         .attempt
         .flatMap(loggingAsyncCallback[F, Unit](logger))
     )
-  }
 
   private def closeStream(): Unit =
     enqueue(Item.Done)(loggingAsyncCallback[F, Unit](logger))
 
   private def enqueue(item: Item)(cb: Either[Throwable, Unit] => F[Unit]): Unit =
     dispatcher.unsafeRunAndForget(queue.offer(item.some).attempt.flatMap(cb))
-
-  private def enqueueSync(item: Item)(cb: Either[Throwable, Unit] => F[Unit]): Unit =
-    dispatcher.unsafeRunSync(queue.offer(item.some).attempt.flatMap(cb))
 }
 
 private[jetty] object ResponseListener {
