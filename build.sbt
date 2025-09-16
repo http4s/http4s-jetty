@@ -44,9 +44,7 @@ lazy val jettyServer = project
     description := "Jetty implementation for http4s servers",
     libraryDependencies ++= Seq(
       "org.eclipse.jetty" % "jetty-client" % jettyVersion % Test,
-      "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion,
       "org.eclipse.jetty" % "jetty-util" % jettyVersion,
-      "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
       "org.typelevel" %% "munit-cats-effect" % munitCatsEffectVersion % Test,
