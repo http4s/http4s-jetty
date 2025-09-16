@@ -19,14 +19,10 @@ package jetty
 
 import cats.effect._
 import org.http4s._
-import org.http4s.jetty.server.JettyBuilder
+import org.http4s.jetty.server.ee9.JettyBuilder
 import org.http4s.server.Server
-import org.http4s.servlet.DefaultFilter
-
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServlet
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.{HttpFilter, HttpServlet, HttpServletRequest, HttpServletResponse}
 
 /** 1. Run as `sbt examples/run`
   * 2. Browse to http://localhost:8080/http4s to see `httpRoutes`
@@ -54,8 +50,8 @@ class JettyExample[F[_]](implicit F: Async[F]) {
   }
 
   // Also supports raw filters alongside your http4s routes
-  val filter = new DefaultFilter {
-    override def doHttpFilter(
+  val filter = new HttpFilter {
+    override def doFilter(
         request: HttpServletRequest,
         response: HttpServletResponse,
         chain: FilterChain,
@@ -63,6 +59,7 @@ class JettyExample[F[_]](implicit F: Async[F]) {
       response.setStatus(403)
       response.getWriter.print("None shall pass!")
     }
+
   }
 
   def resource: Resource[F, Server] =
