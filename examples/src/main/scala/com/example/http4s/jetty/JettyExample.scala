@@ -59,6 +59,7 @@ class JettyExample[F[_]](implicit F: Async[F]) {
       response.setStatus(403)
       response.getWriter.print("None shall pass!")
     }
+
   }
 
   def resource: Resource[F, Server] =
