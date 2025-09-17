@@ -126,7 +126,9 @@ private[jetty] final case class ResponseListener[F[_]](
             closeStream()
         }
         .attempt
-        .flatMap(loggingAsyncCallback[F, Unit](logger))
+        .flatMap {
+          loggingAsyncCallback(logger)(_)
+        }
     )
 
   private def closeStream(): Unit =
