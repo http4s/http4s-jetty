@@ -24,11 +24,11 @@ import cats.effect.std.Queue
 import cats.syntax.all._
 import fs2.Stream._
 import fs2._
-import org.eclipse.jetty.client.Result
-import org.eclipse.jetty.client.{Response => JettyResponse}
+import org.eclipse.jetty.client.api.Result
+import org.eclipse.jetty.client.api.{Response => JettyResponse}
 import org.eclipse.jetty.http.HttpFields
 import org.eclipse.jetty.http.{HttpVersion => JHttpVersion}
-import org.eclipse.jetty.io.Content
+import org.eclipse.jetty.util.{Callback => JettyCallback}
 import org.http4s.internal.CollectionCompat.CollectionConverters._
 import org.http4s.jetty.client.ResponseListener.Item
 import org.http4s.jetty.client.internal.loggingAsyncCallback
@@ -41,7 +41,7 @@ private[jetty] final case class ResponseListener[F[_]](
     cb: Callback[Resource[F, Response[F]]],
     dispatcher: Dispatcher[F],
 )(implicit F: Async[F])
-    extends JettyResponse.Listener {
+    extends JettyResponse.Listener.Adapter {
   import ResponseListener.logger
 
   /* Needed to properly propagate client errors */
@@ -88,16 +88,15 @@ private[jetty] final case class ResponseListener[F[_]](
 
   override def onContent(
       response: JettyResponse,
-      chunk: Content.Chunk,
-      demander: Runnable,
+      content: ByteBuffer,
+      callback: JettyCallback,
   ): Unit = {
-    val content = chunk.getByteBuffer
     val copy = ByteBuffer.allocate(content.remaining())
     copy.put(content).flip()
     enqueue(Item.Buf(copy)) {
-      case Right(_) => F.delay(demander.run())
+      case Right(_) => F.delay(callback.succeeded())
       case Left(e) =>
-        F.delay(logger.error(e)("Error in asynchronous callback"))
+        F.delay(logger.error(e)("Error in asynchronous callback")) >> F.delay(callback.failed(e))
     }
   }
 
@@ -117,19 +116,10 @@ private[jetty] final case class ResponseListener[F[_]](
   override def onComplete(result: Result): Unit = ()
 
   private def abort(t: Throwable, response: JettyResponse): Unit =
-    dispatcher.unsafeRunAndForget(
-      F.fromCompletableFuture(F.delay(response.abort(t)))
-        .map { aborted =>
-          if (!aborted)
-            logger.error(t)("Failed to abort the response")
-          else
-            closeStream()
-        }
-        .attempt
-        .flatMap {
-          loggingAsyncCallback(logger)(_)
-        }
-    )
+    if (!response.abort(t)) // this also aborts the request
+      logger.error(t)("Failed to abort the response")
+    else
+      closeStream()
 
   private def closeStream(): Unit =
     enqueue(Item.Done)(loggingAsyncCallback[F, Unit](logger))
