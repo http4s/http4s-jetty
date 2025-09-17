@@ -15,9 +15,9 @@ ThisBuild / tlSitePublishBranch := Some("main")
 val Scala213 = "2.13.16"
 ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.20", "3.3.6")
 ThisBuild / scalaVersion := Scala213 // the default Scala
-ThisBuild / tlJdkRelease := Some(11)
+ThisBuild / tlJdkRelease := Some(17)
 ThisBuild / githubWorkflowJavaVersions ~= {
-  // Jetty 12 bumps the requirement to Java 17
+  // The minimum required Java version for Jetty 12 is 17.
   _.filter { case JavaSpec(_, major) => major.toInt >= 17 }
 }
 
