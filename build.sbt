@@ -33,7 +33,7 @@ val catsEffectVersion = "3.6.3"
 val jettyVersion = "12.1.7"
 val http4sVersion = "0.23.33"
 val http4sServletVersion = "0.24.0-RC2"
-val munitCatsEffectVersion = "2.1.0"
+val munitCatsEffectVersion = "2.2.0"
 val slf4jVersion = "1.7.25"
 val scalaJava8Compat = "1.0.2"
 
