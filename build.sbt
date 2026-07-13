@@ -30,7 +30,7 @@ lazy val root = project
   .aggregate(jettyServer, jettyServerEe8, jettyClient)
 
 val catsEffectVersion = "3.7.0"
-val jettyVersion = "12.1.10"
+val jettyVersion = "12.1.11"
 val http4sVersion = "0.23.34"
 val http4sServletVersion = "0.24.0-RC2"
 val munitCatsEffectVersion = "2.2.0"
