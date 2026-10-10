@@ -12,8 +12,11 @@ ThisBuild / startYear := Some(2014)
 // publish website from this branch
 ThisBuild / tlSitePublishBranch := Some("main")
 
+val Scala212 = "2.12.21"
 val Scala213 = "2.13.18"
-ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.21", "3.3.8")
+val Scala3   = "3.9.0"
+
+ThisBuild / crossScalaVersions := Seq(Scala213, Scala212, Scala3)
 ThisBuild / scalaVersion := Scala213 // the default Scala
 ThisBuild / tlJdkRelease := Some(17)
 ThisBuild / githubWorkflowJavaVersions ~= {
