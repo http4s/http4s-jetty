@@ -45,7 +45,7 @@ private[jetty] final case class ResponseListener[F[_]](
   import ResponseListener.logger
 
   /* Needed to properly propagate client errors */
-  private[this] var responseSent = false
+  private var responseSent = false
 
   override def onHeaders(response: JettyResponse): Unit = {
     val r = Status

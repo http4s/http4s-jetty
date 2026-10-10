@@ -40,11 +40,15 @@ private[jetty] object JettyLifeCycle {
   )(implicit F: Async[F]): Resource[F, A] =
     Resource.make[F, A](
       fa.flatTap(startLifeCycle[F])
-    ) {
-      case value: LifeCycle with Destroyable =>
-        stopLifeCycle[F](value) *> F.delay(value.destroy())
-      case otherwise =>
-        stopLifeCycle[F](otherwise)
+    ) { value =>
+      val stop = stopLifeCycle[F](value)
+
+      value match {
+        case destroyable: Destroyable =>
+          stop *> F.delay(destroyable.destroy())
+        case _ =>
+          stop
+      }
     }
 
   /** Attempt to invoke [[org.eclipse.jetty.util.component.LifeCycle#stop]] on a
@@ -54,7 +58,7 @@ private[jetty] object JettyLifeCycle {
     * where a [[org.eclipse.jetty.util.component.LifeCycle]] is stopped
     * internally, e.g. due to some internal error occurring.
     */
-  private[this] def stopLifeCycle[F[_]](lifeCycle: LifeCycle)(implicit F: Async[F]): F[Unit] =
+  private def stopLifeCycle[F[_]](lifeCycle: LifeCycle)(implicit F: Async[F]): F[Unit] =
     F.async[Unit] { cb =>
       F.delay {
         val listener =
@@ -97,7 +101,7 @@ private[jetty] object JettyLifeCycle {
     * If the [[org.eclipse.jetty.util.component.LifeCycle]] is already started
     * (or starting) this will fail.
     */
-  private[this] def startLifeCycle[F[_]](lifeCycle: LifeCycle)(implicit F: Async[F]): F[Unit] =
+  private def startLifeCycle[F[_]](lifeCycle: LifeCycle)(implicit F: Async[F]): F[Unit] =
     F.async[Unit] { cb =>
       F.delay {
         val listener = new LifeCycle.Listener {

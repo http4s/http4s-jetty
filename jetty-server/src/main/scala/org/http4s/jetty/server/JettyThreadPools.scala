@@ -47,14 +47,18 @@ object JettyThreadPools {
     *       function ''has not been started''. If it has and it implements
     *       [[org.eclipse.jetty.util.component.LifeCycle]], then the creation
     *       of the [[cats.effect.Resource]] will fail.
+    * @note I changed this just to trap the lifecycle instance and give it alias of thread pool.
+    *       You may need to `git bisect if I get this wrong`
     */
   def resource[F[_]](value: F[ThreadPool])(implicit F: Async[F]): Resource[F, ThreadPool] =
     Resource.eval(value).flatMap {
-      // I know, this is gross.
-      case value: ThreadPool with LifeCycle =>
-        JettyLifeCycle.lifeCycleAsResource[F, ThreadPool with LifeCycle](F.pure(value))
-      case value: ThreadPool =>
-        Resource.make(F.pure(value))(value => F.blocking(value.join()))
+      case threadPool @ (lifecycle: LifeCycle) =>
+        JettyLifeCycle
+          .lifeCycleAsResource[F, LifeCycle](F.pure(lifecycle))
+          .map(_ => threadPool)
+
+      case threadPool =>
+        Resource.make(F.pure(threadPool))(pool => F.blocking(pool.join()))
     }
 
   /** The default [[org.eclipse.jetty.util.thread.ThreadPool]] used by
