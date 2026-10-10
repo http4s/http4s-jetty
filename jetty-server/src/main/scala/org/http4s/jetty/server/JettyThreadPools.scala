@@ -52,13 +52,13 @@ object JettyThreadPools {
     */
   def resource[F[_]](value: F[ThreadPool])(implicit F: Async[F]): Resource[F, ThreadPool] =
     Resource.eval(value).flatMap {
-        case threadPool@(lifecycle: LifeCycle) =>
-            JettyLifeCycle
-                .lifeCycleAsResource[F, LifeCycle](F.pure(lifecycle))
-                .map(_ => threadPool)
+      case threadPool @ (lifecycle: LifeCycle) =>
+        JettyLifeCycle
+          .lifeCycleAsResource[F, LifeCycle](F.pure(lifecycle))
+          .map(_ => threadPool)
 
-        case threadPool =>
-            Resource.make(F.pure(threadPool))(pool => F.blocking(pool.join()))
+      case threadPool =>
+        Resource.make(F.pure(threadPool))(pool => F.blocking(pool.join()))
     }
 
   /** The default [[org.eclipse.jetty.util.thread.ThreadPool]] used by
