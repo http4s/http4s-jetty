@@ -40,11 +40,15 @@ private[jetty] object JettyLifeCycle {
   )(implicit F: Async[F]): Resource[F, A] =
     Resource.make[F, A](
       fa.flatTap(startLifeCycle[F])
-    ) {
-      case value: LifeCycle & Destroyable =>
-        stopLifeCycle[F](value) *> F.delay(value.destroy())
-      case otherwise =>
-        stopLifeCycle[F](otherwise)
+    ) { value =>
+      val stop = stopLifeCycle[F](value)
+
+      value match {
+        case destroyable: Destroyable =>
+          stop *> F.delay(destroyable.destroy())
+        case _ =>
+          stop
+      }
     }
 
   /** Attempt to invoke [[org.eclipse.jetty.util.component.LifeCycle#stop]] on a

@@ -76,7 +76,7 @@ sealed class JettyBuilder[F[_]] private (
     with ServerBuilder[F] {
   type Self = JettyBuilder[F]
 
-  private[this] val logger = getLogger
+  private val logger = getLogger
 
   private def copy(
       socketAddress: InetSocketAddress = socketAddress,
