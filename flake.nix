@@ -18,7 +18,7 @@
           imports = [ typelevel-nix.typelevelShell ];
           name = "http4s-jetty-shell";
           typelevelShell = {
-            jdk.package = pkgs.jdk11;
+            jdk.package = pkgs.jdk17;
           };
         };
       }
