@@ -14,7 +14,7 @@ ThisBuild / tlSitePublishBranch := Some("main")
 
 val Scala212 = "2.12.21"
 val Scala213 = "2.13.18"
-val Scala3 = "3.9.0"
+val Scala3 = "3.10.1"
 
 ThisBuild / crossScalaVersions := Seq(Scala213, Scala212, Scala3)
 ThisBuild / scalaVersion := Scala213 // the default Scala
@@ -35,10 +35,9 @@ lazy val root = project
 val catsEffectVersion = "3.7.1"
 val jettyVersion = "12.1.14"
 val http4sVersion = "0.23.38"
-val http4sServletVersion = "0.24.0-RC2"
+val http4sServletVersion = "0.24.0"
 val munitCatsEffectVersion = "2.2.1"
-val slf4jVersion = "1.7.25"
-val scalaJava8Compat = "1.0.2"
+val slf4jVersion = "2.0.20"
 
 lazy val jettyServer = project
   .in(file("jetty-server"))
