@@ -11,6 +11,7 @@
 | 0.26.x       | 0.23.x      | 12.x    | 4.0         | ✅         | ✅         | ✅      | Milestone |
 | 0.27.x       | 0.23.x      | 12.x    | 5.0         | ✅         | ✅         | ✅      | Milestone |
 | 0.28.x       | 0.23.x      | 12.x    | 6.0         | ✅         | ✅         | ✅      | Milestone |
+| 0.29.x       | 0.23.x      | 12.x    | 6.1         | ✅         | ✅         | ✅      | Milestone |
 
 [^1]: Additional artifacts named `http4s-jetty12-*` were published against Jetty 12 as a courtesy after Jetty 9 reached EOL.
 
