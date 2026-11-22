@@ -13,7 +13,7 @@ ThisBuild / startYear := Some(2014)
 ThisBuild / tlSitePublishBranch := Some("main")
 
 val Scala213 = "2.13.18"
-ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.20", "3.3.7")
+ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.21", "3.10.1")
 ThisBuild / scalaVersion := Scala213 // the default Scala
 ThisBuild / tlJdkRelease := Some(17)
 ThisBuild / githubWorkflowJavaVersions ~= {
@@ -30,12 +30,11 @@ lazy val root = project
   .aggregate(jettyServer, jettyServerEe10, jettyClient)
 
 val catsEffectVersion = "3.6.4"
-val jettyVersion = "12.1.4"
+val jettyVersion = "12.1.14"
 val http4sVersion = "0.23.38"
-val http4sServletVersion = "0.25.0-RC1"
+val http4sServletVersion = "0.26.0-M1"
 val munitCatsEffectVersion = "2.2.1"
-val slf4jVersion = "1.7.25"
-val scalaJava8Compat = "1.0.2"
+val slf4jVersion = "2.0.20"
 
 lazy val jettyServer = project
   .in(file("jetty-server"))
