@@ -51,8 +51,8 @@ object JettyThreadPools {
   def resource[F[_]](value: F[ThreadPool])(implicit F: Async[F]): Resource[F, ThreadPool] =
     Resource.eval(value).flatMap {
       // I know, this is gross.
-      case value: ThreadPool with LifeCycle =>
-        JettyLifeCycle.lifeCycleAsResource[F, ThreadPool with LifeCycle](F.pure(value))
+      case value: LifeCycle =>
+        JettyLifeCycle.lifeCycleAsResource(F.pure(value))
       case value: ThreadPool =>
         Resource.make(F.pure(value))(value => F.blocking(value.join()))
     }
