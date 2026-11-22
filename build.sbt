@@ -27,12 +27,12 @@ ThisBuild / resolvers +=
 lazy val root = project
   .in(file("."))
   .enablePlugins(NoPublishPlugin)
-  .aggregate(jettyServer, jettyServerEe10, jettyClient)
+  .aggregate(jettyServer, jettyServerEe11, jettyClient)
 
 val catsEffectVersion = "3.6.4"
 val jettyVersion = "12.1.14"
 val http4sVersion = "0.23.38"
-val http4sServletVersion = "0.26.0-M1"
+val http4sServletVersion = "0.27.0-M2"
 val munitCatsEffectVersion = "2.2.1"
 val slf4jVersion = "2.0.20"
 
@@ -51,13 +51,13 @@ lazy val jettyServer = project
     jettyApiMappings,
   )
 
-lazy val jettyServerEe10 = project
-  .in(file("jetty-server-ee10"))
+lazy val jettyServerEe11 = project
+  .in(file("jetty-server-ee11"))
   .settings(
-    name := "http4s-jetty-server-ee10",
+    name := "http4s-jetty-server-ee11",
     description := "Jetty implementation for http4s servers",
     libraryDependencies ++= Seq(
-      "org.eclipse.jetty.ee10" % "jetty-ee10-servlet" % jettyVersion,
+      "org.eclipse.jetty.ee11" % "jetty-ee11-servlet" % jettyVersion,
       "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion,
       "org.http4s" %% "http4s-server" % http4sVersion,
       "org.http4s" %% "http4s-servlet" % http4sServletVersion,
@@ -78,7 +78,7 @@ lazy val examples = project
       "org.slf4j" % "slf4j-simple" % slf4jVersion % Runtime
     ),
   )
-  .dependsOn(jettyServerEe10)
+  .dependsOn(jettyServerEe11)
 
 lazy val jettyClient = project
   .in(file("jetty-client"))

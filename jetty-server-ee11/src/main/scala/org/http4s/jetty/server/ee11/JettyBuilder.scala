@@ -17,7 +17,7 @@
 package org.http4s
 package jetty
 package server
-package ee10
+package ee11
 
 import cats.effect._
 import cats.effect.kernel.Async
@@ -26,9 +26,9 @@ import cats.syntax.all._
 import jakarta.servlet.DispatcherType
 import jakarta.servlet.http.HttpFilter
 import jakarta.servlet.http.HttpServlet
-import org.eclipse.jetty.ee10.servlet.FilterHolder
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler
-import org.eclipse.jetty.ee10.servlet.ServletHolder
+import org.eclipse.jetty.ee11.servlet.FilterHolder
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler
+import org.eclipse.jetty.ee11.servlet.ServletHolder
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
@@ -37,7 +37,7 @@ import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.{Server => JServer}
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
-import org.http4s.jetty.server.ee10.JettyBuilder._
+import org.http4s.jetty.server.ee11.JettyBuilder._
 import org.http4s.server.DefaultServiceErrorHandler
 import org.http4s.server.Server
 import org.http4s.server.ServerBuilder
