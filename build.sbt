@@ -13,6 +13,7 @@ ThisBuild / startYear := Some(2014)
 ThisBuild / tlSitePublishBranch := Some("main")
 
 val Scala213 = "2.13.18"
+
 ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.21", "3.10.1")
 ThisBuild / scalaVersion := Scala213 // the default Scala
 ThisBuild / tlJdkRelease := Some(17)
@@ -29,8 +30,8 @@ lazy val root = project
   .enablePlugins(NoPublishPlugin)
   .aggregate(jettyServer, jettyServerEe10, jettyClient)
 
-val catsEffectVersion = "3.6.4"
-val jettyVersion = "12.1.14"
+val catsEffectVersion = "3.7.1"
+val jettyVersion = "12.1.4"
 val http4sVersion = "0.23.38"
 val http4sServletVersion = "0.26.0-M1"
 val munitCatsEffectVersion = "2.2.1"
