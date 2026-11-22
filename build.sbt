@@ -13,7 +13,7 @@ ThisBuild / startYear := Some(2014)
 ThisBuild / tlSitePublishBranch := Some("main")
 
 val Scala213 = "2.13.18"
-ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.20", "3.3.7")
+ThisBuild / crossScalaVersions := Seq(Scala213, "2.12.21", "3.10.1")
 ThisBuild / scalaVersion := Scala213 // the default Scala
 ThisBuild / tlJdkRelease := Some(17)
 ThisBuild / githubWorkflowJavaVersions ~= {
@@ -27,15 +27,14 @@ ThisBuild / resolvers +=
 lazy val root = project
   .in(file("."))
   .enablePlugins(NoPublishPlugin)
-  .aggregate(jettyServer, jettyServerEe10, jettyClient)
+  .aggregate(jettyServer, jettyServerEe11, jettyClient)
 
 val catsEffectVersion = "3.6.4"
-val jettyVersion = "12.1.4"
+val jettyVersion = "12.1.14"
 val http4sVersion = "0.23.38"
-val http4sServletVersion = "0.25.0-RC1"
+val http4sServletVersion = "0.27.0-M2"
 val munitCatsEffectVersion = "2.2.1"
-val slf4jVersion = "1.7.25"
-val scalaJava8Compat = "1.0.2"
+val slf4jVersion = "2.0.20"
 
 lazy val jettyServer = project
   .in(file("jetty-server"))
@@ -52,13 +51,13 @@ lazy val jettyServer = project
     jettyApiMappings,
   )
 
-lazy val jettyServerEe10 = project
-  .in(file("jetty-server-ee10"))
+lazy val jettyServerEe11 = project
+  .in(file("jetty-server-ee11"))
   .settings(
-    name := "http4s-jetty-server-ee10",
+    name := "http4s-jetty-server-ee11",
     description := "Jetty implementation for http4s servers",
     libraryDependencies ++= Seq(
-      "org.eclipse.jetty.ee10" % "jetty-ee10-servlet" % jettyVersion,
+      "org.eclipse.jetty.ee11" % "jetty-ee11-servlet" % jettyVersion,
       "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion,
       "org.http4s" %% "http4s-server" % http4sVersion,
       "org.http4s" %% "http4s-servlet" % http4sServletVersion,
@@ -79,7 +78,7 @@ lazy val examples = project
       "org.slf4j" % "slf4j-simple" % slf4jVersion % Runtime
     ),
   )
-  .dependsOn(jettyServerEe10)
+  .dependsOn(jettyServerEe11)
 
 lazy val jettyClient = project
   .in(file("jetty-client"))
