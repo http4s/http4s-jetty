@@ -32,7 +32,7 @@ lazy val root = project
 
 val catsEffectVersion = "3.7.1"
 val jettyVersion = "12.1.4"
-val http4sVersion = "0.23.38"
+val http4sVersion = "0.23.39"
 val http4sServletVersion = "0.26.0-M1"
 val munitCatsEffectVersion = "2.2.1"
 val slf4jVersion = "2.0.20"
